@@ -306,8 +306,8 @@ __add_implicit_workspace_join (MidgardQuerySelect *self, GdaSqlOperation *operat
 	s_target->table_name = g_string_free (table, FALSE);
 	s_target->as = right_table;
 	gda_sql_select_from_take_new_target (from, s_target);
-	MIDGARD_QUERY_EXECUTOR (self)->priv->include_deleted_targets = 
-		g_slist_append (MIDGARD_QUERY_EXECUTOR (self)->priv->include_deleted_targets, s_target);
+	/* MIDGARD_QUERY_EXECUTOR (self)->priv->include_deleted_targets = 
+		g_slist_append (MIDGARD_QUERY_EXECUTOR (self)->priv->include_deleted_targets, s_target); */
 
 	GdaSqlExpr *texpr = gda_sql_expr_new (GDA_SQL_ANY_PART (s_target));
 	GValue *tval = g_new0 (GValue, 1);
@@ -325,7 +325,7 @@ __add_implicit_workspace_join (MidgardQuerySelect *self, GdaSqlOperation *operat
 
 }
 
-gboolean __query_select_add_joins (MidgardQuerySelect *self, GError **error)
+gboolean __query_select_add_joins (MidgardQuerySelect *self, GdaSqlOperation *operation, GError **error)
 {
 #warning "Add workspace condition" 
 	__add_implicit_workspace_join (self, operation);
@@ -616,15 +616,14 @@ _midgard_query_select_executable_iface_execute (MidgardExecutable *iface, GError
 	/* Add fields for all properties registered per class (SELECT a,b,c...) */	
 	klass->dbpriv->add_fields_to_select_statement (klass, mgd, sss, s_target->as);
 
+	GdaSqlExpr *where = sss->where_cond;
+	GdaSqlOperation *operation = where->cond;
 	/* Add joins, LEFT JOIN tbl2 ON... */
-	__query_select_add_joins (MIDGARD_QUERY_SELECT (self), &err);
+	__query_select_add_joins (MIDGARD_QUERY_SELECT (self), operation, &err));
 	if (err) {
 	 	g_propagate_error (error, err);
 		goto return_false;
 	}
-
-	GdaSqlExpr *where = sss->where_cond;
-	GdaSqlOperation *operation = where->cond;
 
 	/* Add constraints' conditions (WHERE a=1, b=2...) */
 	if (MIDGARD_QUERY_EXECUTOR (self)->priv->constraint) {
