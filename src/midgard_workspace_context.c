@@ -130,7 +130,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 			}
 		} else {
 			MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-			dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id, 0);
+			dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
 		}
 
 		if (ws_parent)

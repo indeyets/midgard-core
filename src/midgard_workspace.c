@@ -97,7 +97,7 @@ midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError
 
 	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
 	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id, 0);
+	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
 
 	return ws;
 }
@@ -675,7 +675,8 @@ static void _midgard_workspace_class_init(
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_statement_update (MIDGARD_DBOBJECT_CLASS (klass));
 
 	/* Set sql for select queries */
-	midgard_core_dbobject_class_set_full_select (MIDGARD_DBOBJECT_CLASS (klass));
+#warning SET STATIC SQL
+	//midgard_core_dbobject_class_set_full_select (MIDGARD_DBOBJECT_CLASS (klass));
 }
 
 GType 
