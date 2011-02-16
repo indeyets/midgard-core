@@ -134,7 +134,6 @@ static void _midgard_connection_dispose(GObject *object)
 	MidgardConnection *self = (MidgardConnection *) object;
 
 	GdaConnection *gda_cnc = NULL;
-	GdaClient *gda_client = NULL;
 
 	while (self->priv->user != NULL) {
 		// emptying authstack
@@ -150,10 +149,6 @@ static void _midgard_connection_dispose(GObject *object)
 
 		gda_cnc = self->priv->connection;
 	}
-
-	/* Unref and free those at the end. There might be some callbacks registered! */
-	if (gda_client != NULL)
-		g_object_unref(gda_client);
 
 
 	/* Disconnect and do not invoke error callbacks */
