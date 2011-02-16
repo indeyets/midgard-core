@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+NULL = 
+
 ACLOCAL_AMFLAGS = -I m4
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
@@ -79,6 +81,11 @@ midgard_public_h = \
 	src/midgard_utils.h \
 	src/midgard_validable.h \
 	src/midgard_view.h
+	src/midgard_view.h \
+	src/midgard_workspace.h \
+	src/midgard_workspace_context.h \
+	src/midgard_workspace_storage.h \
+	$(NULL)
 
 man_MANS = man/midgard2-schema.1 \
 	man/midgard2-query.1 
@@ -140,7 +147,10 @@ src_libmidgard2_la_core_SOURCES = \
 	src/midgard_core_views.c \
 	src/midgard_core_views.h \
 	src/midgard_core_xml.h \
-	src/midgard_core_xml.c 
+	src/midgard_core_xml.c \
+    	src/midgard_core_workspace.h \
+	src/midgard_core_workspace.c \
+	$(NULL)
 
 src_libmidgard2_la_public_SOURCES = \
 	src/midgard.c \
@@ -193,6 +203,11 @@ src_libmidgard2_la_public_SOURCES = \
 	src/midgard_md5.h \
 	src/midgard_validable.c \
 	src/midgard_view.c
+	src/midgard_view.c \
+	src/midgard_workspace.c \
+	src/midgard_workspace_context.c \
+	src/midgard_workspace_storage.c \
+	$(NULL)
 
 pkgdatadir = $(datadir)/midgard2
 pkglibdir = $(libdir)/midgard2
