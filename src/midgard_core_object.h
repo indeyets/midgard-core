@@ -206,6 +206,11 @@ struct _MidgardConnectionPrivate {
 	gboolean enable_quota;
 	gboolean enable_debug;
 	gboolean enable_dbus;
+	gboolean enable_workspace;
+
+	gboolean has_workspace;
+	gpointer workspace;
+	GdaDataModel *workspace_model;
 };
 
 #define MGD_CNC_PERSON(_cnc) _cnc->priv->user ? midgard_user_get_person (_cnc->priv->user) : NULL
@@ -213,6 +218,9 @@ struct _MidgardConnectionPrivate {
 #define MGD_CNC_REPLICATION(_cnc) _cnc->priv->enable_replication
 #define	MGD_CNC_DEBUG(_cnc) _cnc->priv->enable_debug
 #define MGD_CNC_DBUS(_cnc) _cnc->priv->enable_dbus
+#define MGD_CNC_HAS_WORKSPACE(_cnc) _cnc->priv->has_workspace
+#define MGD_CNC_WORKSPACE(_cnc) (MidgardWorkspace *)_cnc->priv->workspace
+#define MGD_CNC_WORKSPACE_ID(_cnc) MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE(MGD_CNC_WORKSPACE(_cnc))->priv->get_id(MIDGARD_WORKSPACE_STORAGE (MGD_CNC_WORKSPACE(_cnc)))
 
 struct _MidgardBlobPrivate {
 	MidgardObject *attachment;
