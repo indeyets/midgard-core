@@ -42,7 +42,7 @@
  * In other case, new instance is assumed top most workspace.
  *
  * Returns: #MidgardWorkspace object or %NULL
- * Since: 10.11
+ * Since: 10.05.4
  */ 
 MidgardWorkspace *
 midgard_workspace_new (MidgardConnection *mgd, MidgardWorkspace *parent_workspace)
@@ -75,7 +75,7 @@ midgard_workspace_new (MidgardConnection *mgd, MidgardWorkspace *parent_workspac
  * </itemizedlist>
  *
  * Returns: new #MidgardWorkspace instance if found, %NULL otherwise
- * Since: 10.11
+ * Since: 10.05.4
  */
 MidgardWorkspace *
 midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError **error)
@@ -115,7 +115,7 @@ midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError
  * </itemizedlist>
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.11
+ * Since: 10.05.4
  */
 gboolean 
 midgard_workspace_create (MidgardWorkspace *self, GError **error)
@@ -177,7 +177,7 @@ midgard_workspace_create (MidgardWorkspace *self, GError **error)
  * @self: #MidgardWorkspace instance
  *
  * Returns: #MidgardWorkspaceContext @self is in or %NULL
- * Since: 10.11
+ * Since: 10.05.4
  */
 MidgardWorkspaceContext*
 midgard_workspace_get_context (MidgardWorkspace *self)

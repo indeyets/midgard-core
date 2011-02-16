@@ -38,7 +38,7 @@ struct _MidgardWorkspaceContextPrivate {
  * Check if #MidgardWorkspaceContext exists at given path.
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.11
+ * Since: 10.05.4
  */ 
 gboolean
 midgard_workspace_context_exists (MidgardConnection *mgd, const gchar *path, GError **error)
@@ -69,7 +69,7 @@ midgard_workspace_context_exists (MidgardConnection *mgd, const gchar *path, GEr
  * is checked for every given @path's named element.
  *
  * Returns: #MidgardWorkspaceConext object or %NULL
- * Since: 10.11
+ * Since: 10.05.4
  */ 
 MidgardWorkspaceContext*
 midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GError **error)
@@ -164,7 +164,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
  * First array element is root #MidgardWorkspace, the last one is current one.
  *
  * Returns: (array-length=1): newly allocated, NULL terminated array of strings
- * Since: 10.11
+ * Since: 10.05.4
  */ 
 gchar**
 midgard_workspace_context_get_workspace_names (MidgardWorkspaceContext *self, guint *elements)
@@ -217,7 +217,7 @@ midgard_workspace_context_get_workspace_names (MidgardWorkspaceContext *self, gu
  * #MidgardWorkspace names in given context. 
  *
  * Returns: new #MidgardWorkspace object or %NULL if there is no such named workspace in context.
- * Since: 10.11
+ * Since: 10.05.4
  */ 
 MidgardWorkspace*
 midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceContext *self, const gchar *name)
