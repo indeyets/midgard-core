@@ -97,7 +97,12 @@ struct _MidgardObjectPrivate{
 	gchar *imported;
 	GSList *parameters;
 	GHashTable *_params;
+	guint ws_id;
+	guint ws_object_id;
 };
+
+#define MGD_OBJECT_WS_ID(__obj) MIDGARD_OBJECT(__obj)->priv->ws_id
+#define MGD_OBJECT_WS_OID(__obj) MIDGARD_OBJECT(__obj)->priv->ws_object_id
 
 struct _MidgardObjectClassPrivate {
 	MgdSchemaTypeAttr *storage_data;
