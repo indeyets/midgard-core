@@ -117,6 +117,9 @@ midgard_storage_create_base_storage(MidgardConnection *mgd)
 	if(model)
 		g_object_unref(model);
 
+	/* workspace table */
+	midgard_storage_create (mgd, "MidgardWorkspace");
+
 	return TRUE;
 }
 
