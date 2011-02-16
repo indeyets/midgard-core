@@ -25,7 +25,6 @@
 
 #include "midgard_defs.h"
 #include "midgard_config.h"
-#include "midgard_workspace.h"
 #include "midgard_workspace_storage.h"
 
 /* convention macros */
