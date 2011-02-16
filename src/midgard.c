@@ -32,6 +32,7 @@
 #include "midgard_view.h"
 #include "midgard_timestamp.h"
 #include "midgard_metadata.h"
+#include "midgard_workspace.h"
 
 #include <locale.h>
 

@@ -78,6 +78,11 @@ midgard_connection_private_new (void)
 	cnc_private->enable_quota = FALSE;
 	cnc_private->enable_debug = FALSE;
 	cnc_private->enable_dbus = FALSE;
+	cnc_private->enable_workspace = FALSE;
+
+	/* workspace */
+	cnc_private->has_workspace = FALSE;
+	cnc_private->workspace_model = NULL;
 
 	return cnc_private;
 }
@@ -118,6 +123,11 @@ static void _midgard_connection_finalize(GObject *object)
 		if (self->priv->config && G_IS_OBJECT (self->priv->config)) {
 			g_object_unref(self->priv->config);
 			self->priv->config = NULL;
+		}
+		/* Free workspace model */
+		if (self->priv->workspace_model && G_IS_OBJECT (self->priv->workspace_model)) {
+			g_object_unref (self->priv->workspace_model);
+			self->priv->workspace_model = NULL;
 		}
 	}
 
