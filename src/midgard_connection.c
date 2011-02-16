@@ -161,6 +161,10 @@ static void _midgard_connection_dispose(GObject *object)
 	}
 
 
+  	if (self->priv->workspace)
+		g_object_unref (self->priv->workspace);
+	self->priv->workspace = NULL;
+
 	/* Disconnect and do not invoke error callbacks */
 	if (self->priv->error_clbk_connected)
 		midgard_core_connection_disconnect_error_callback(self);
@@ -601,6 +605,9 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 
 	/* Loads available authentication types */
 	midgard_core_connection_initialize_auth_types(mgd);
+
+	/* Loads all available workspaces */
+	midgard_core_workspace_list_all (mgd);
 
 	g_signal_emit (mgd, MIDGARD_CONNECTION_GET_CLASS (mgd)->signal_id_connected, 0);
 
@@ -1246,6 +1253,13 @@ MidgardConnection *midgard_connection_copy(MidgardConnection *self)
 	 * Copy will be used for this. Do not duplicate callbacks invokation */
 	midgard_core_connection_disconnect_error_callback(self);
 
+	#warning implement workspace_model copy 
+	/* Increase workspace reference count.
+	 * For example, connection might be copied to new thread, so we 
+	 * need to ensure, workspace object is valid */
+	if (self->priv->workspace)
+		new_mgd->priv->workspace = g_object_ref (self->priv->workspace);
+
 	return new_mgd;
 }
 
@@ -1301,6 +1315,22 @@ midgard_connection_enable_dbus (MidgardConnection *self, gboolean toggle)
 }
 
 /**
+ * midgard_connection_enable_workspace:
+ * @self: #MidgardConnection instance
+ * @toggle: workspace enable, disable toggle
+ *
+ * Enable or disable workspace (and contexts) support
+ *
+ * Since: 10.05.4
+ */ 
+void
+midgard_connection_enable_workspace (MidgardConnection *self, gboolean toggle)
+{
+	g_return_if_fail (self != NULL);
+	self->priv->enable_workspace = toggle;
+}
+
+/**
  * midgard_connection_is_enabled_quota:
  * @self: #MidgardConnection instance
  *
@@ -1343,4 +1373,68 @@ midgard_connection_is_enabled_dbus (MidgardConnection *self)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	return self->priv->enable_dbus;
+}
+
+/**
+ * midgard_connection_is_enabled_workspace:
+ * @self: #MidgardConnection instance
+ *
+ * Returns: %TRUE, if workspace support is enabled, %FALSE otherwise
+ * 
+ * Since: 10.05.4
+ */ 
+gboolean                
+midgard_connection_is_enabled_workspace (MidgardConnection *self)
+{
+	g_return_val_if_fail (self != NULL, FALSE);
+	return self->priv->enable_workspace;
+}
+
+/**
+ * midgard_connection_set_workspace:
+ * @self: #MidgardConnection instance
+ * @workspace: #MidgardWorkspaceStorage to set for given #MidgardConnection
+ *
+ * Actual workspace scope depends on #MidgardWorkspaceStorage implementation.
+ * For example, if #MidgardWorkspaceContext is passed as @workspace argument,
+ * Midgard environmental workspace is a tree context, which is the opposite 
+ * of #MidgardWorkspace which limits workspace scope to given one only.
+ *
+ * Returns: %TRUE on success, %FALSE otherwise
+ * Since: 10.05.4
+ */ 
+gboolean
+midgard_connection_set_workspace (MidgardConnection *self, MidgardWorkspaceStorage *workspace)
+{
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (workspace != NULL, FALSE);
+	g_return_val_if_fail (MIDGARD_IS_WORKSPACE_STORAGE (workspace), FALSE);
+
+	if (self->priv->workspace)
+		g_object_unref (self->priv->workspace);
+	self->priv->workspace = (gpointer) g_object_ref (workspace);
+
+	self->priv->has_workspace = TRUE;
+
+	/* TODO WS: emit signal */
+
+	return TRUE;
+}
+
+/**
+ * midgard_connection_get_context:
+ * @self: #MidgardConnection instance
+ *
+ * Returns: (tranfer none): #MidgardWorkspaceStorage associated with #MidgardConnection or %NULL
+ * Since: 10.05.4
+ */
+const MidgardWorkspaceStorage*
+midgard_connection_get_workspace (MidgardConnection *self)
+{
+	g_return_val_if_fail (self != NULL, NULL);
+	
+	if (!self->priv->workspace)
+		return NULL;
+
+	return MIDGARD_WORKSPACE_STORAGE (self->priv->workspace);
 }
