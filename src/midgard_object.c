@@ -1381,7 +1381,7 @@ _mgdschema_class_set_static_sql_select (MidgardConnection *mgd, MidgardDBObjectC
 }
 
 static void
-__add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaSqlStatementSelect *select, const gchar *table_name)
+__add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cnc, GdaSqlStatementSelect *select, const gchar *table_name)
 {
 	GdaSqlSelectField *select_field;
 	GdaSqlExpr *expr;
@@ -1416,14 +1416,11 @@ __add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaSqlStatementSe
 	expr->value = val;
 	select_field->expr = expr;
 
-	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement (klass, select, table_name);
-<<<<<<< HEAD
-
-=======
+	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement (klass, cnc, select, table_name);
 }
 
 static void
-__set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, gint start_field)
+__set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row)
 {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (model != NULL);
@@ -1433,6 +1430,8 @@ __set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, gin
 	const GValue *value;
 
 	guint id;
+#warning "FIX START FIELD"
+	guint start_field = 0;
 
 	/* object ws id */
 	value = gda_data_model_get_value_at (model, start_field, row, &error);
@@ -1479,8 +1478,7 @@ __set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, gin
 	if (error) g_clear_error (&error);
 
 	/* chain up */
-	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row, start_field);
-
+	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row);
 }
 
 static void
@@ -3984,7 +3982,7 @@ midgard_object_get_workspace (MidgardObject *self)
 
 	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
 	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id, 0);
+	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
 
 	return ws;
 }
