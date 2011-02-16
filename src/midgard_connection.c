@@ -59,11 +59,7 @@ midgard_connection_private_new (void)
 	cnc_private->loglevel = 0;	
 	cnc_private->user = NULL;
 	cnc_private->inherited = FALSE;
-#ifdef HAVE_LIBGDA_4
 	cnc_private->parser = NULL;
-#else
-	cnc_private->client = NULL;
-#endif
 	cnc_private->connection = NULL;
 	cnc_private->configname = NULL;
 	cnc_private->cnc_str = NULL;
@@ -138,9 +134,7 @@ static void _midgard_connection_dispose(GObject *object)
 	MidgardConnection *self = (MidgardConnection *) object;
 
 	GdaConnection *gda_cnc = NULL;
-#ifndef HAVE_LIBGDA_4
 	GdaClient *gda_client = NULL;
-#endif
 
 	while (self->priv->user != NULL) {
 		// emptying authstack
@@ -150,21 +144,17 @@ static void _midgard_connection_dispose(GObject *object)
 
 	/* Free only these data which are not inherited */
 	if (!self->priv->inherited) {
-#ifdef HAVE_LIBGDA_4
+
 		if(self->priv->parser != NULL)
 			g_object_unref(self->priv->parser);
-#else
-		gda_client = self->priv->client;
-#endif
 
 		gda_cnc = self->priv->connection;
 	}
 
-#ifndef HAVE_LIBGDA_4
 	/* Unref and free those at the end. There might be some callbacks registered! */
 	if (gda_client != NULL)
 		g_object_unref(gda_client);
-#endif
+
 
 	/* Disconnect and do not invoke error callbacks */
 	if (self->priv->error_clbk_connected)
@@ -456,7 +446,7 @@ static void cnc_add_part(
 	if (value == NULL) {
 		value = def;
 	}
-#ifdef HAVE_LIBGDA_4
+
 	if (*value) {
 		gchar *tmp;
 
@@ -476,25 +466,6 @@ static void cnc_add_part(
 		g_string_append(cnc, tmp);
 		g_free (tmp);
 	}
-#else
-	if (*value) {
-		/* Add a separating semicolon if there already are
-		 parameters before this one. */
-		
-		if (cnc->len > 0) {
-			g_string_append_c(cnc, ';');
-		}
-		g_string_append(cnc, name);
-		g_string_append_c(cnc, '=');
-		
-		/* Make sure that the parameter being added does not contain a
-		 * semicolon that would confuse the simple libgda parser! */
-		
-		for(; *value; value++) {
-			g_string_append_c(cnc, *value != ';' ? *value : ',');
-		}
-	}
-#endif
 }
 
 gboolean 
@@ -507,9 +478,7 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 
 	gchar *host, *dbname, *dbuser, *dbpass, *loglevel, *tmpstr;
 	guint port = 0;
-#ifdef HAVE_LIBGDA_4
 	gchar *auth = NULL;
-#endif
 	MidgardConfig *config = mgd->priv->config;
 	host = config->host;
 	dbname = config->database;
@@ -524,12 +493,8 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 		g_setenv("LIBGDA_NO_THREADS", "yes", TRUE);
 
 	/* Initialize libgda */
-#ifdef HAVE_LIBGDA_4
 	gda_init ();
-#else
-	gchar **args = NULL;
-	gda_init ("MIDGARD", "1.9", 0, args);
-#endif
+
 	midgard_connection_set_loglevel(mgd, loglevel, NULL);
 
 	if(config->priv->dbtype == MIDGARD_DB_TYPE_SQLITE) {
@@ -552,18 +517,13 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 		cnc_add_part(cnc, "TNSNAME", dbname, MGD_MYSQL_HOST);
 		cnc_add_part(cnc, "HOST", host, MGD_MYSQL_HOST);
 		cnc_add_part(cnc, "DB_NAME", dbname, MGD_MYSQL_DATABASE);
-#ifdef HAVE_LIBGDA_4
+
 		tmpstr = g_string_free(cnc, FALSE);
 
 		cnc = g_string_sized_new(100);
 		cnc_add_part(cnc, "USERNAME", dbuser, MGD_MYSQL_USERNAME);
 		cnc_add_part(cnc, "PASSWORD", dbpass, MGD_MYSQL_PASSWORD);
 		auth = g_string_free(cnc, FALSE);
-#else
-		cnc_add_part(cnc, "USER", dbuser, MGD_MYSQL_USERNAME);
-		cnc_add_part(cnc, "PASSWORD", dbpass, MGD_MYSQL_PASSWORD);
-		tmpstr = g_string_free(cnc, FALSE);
-#endif
 
 	} else { 
 		
@@ -579,34 +539,20 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 		}
 
 		cnc_add_part(cnc, "DB_NAME", dbname, MGD_MYSQL_DATABASE);
-#ifdef HAVE_LIBGDA_4
+
 		tmpstr = g_string_free(cnc, FALSE);
 
 		GString *auth_str = g_string_sized_new(100);
 		cnc_add_part(auth_str, "USERNAME", dbuser, MGD_MYSQL_USERNAME);
 		cnc_add_part(auth_str, "PASSWORD", dbpass, MGD_MYSQL_PASSWORD);
 		auth = g_string_free(auth_str, FALSE);
-#else
-		cnc_add_part(cnc, "USER", dbuser, MGD_MYSQL_USERNAME);
-		cnc_add_part(cnc, "PASSWORD", dbpass, MGD_MYSQL_PASSWORD);
-		
-		tmpstr = g_string_free(cnc, FALSE);
-#endif
 	}
 
+
 	GError *err = NULL;
-#ifdef HAVE_LIBGDA_4
 	GdaConnection *connection = gda_connection_open_from_string(
 			config->dbtype, tmpstr, auth, GDA_CONNECTION_OPTIONS_NONE, &err);
-
 	g_free(auth);	
-#else
-	GdaClient *client =  gda_client_new();
-	GdaConnection *connection = gda_client_open_connection_from_string(
-			client, config->dbtype, tmpstr, NULL, NULL, 0, &err);
-	mgd->priv->cnc_str = g_strdup(tmpstr);
-	mgd->priv->auth_str = NULL;
-#endif
 
 	if(connection == NULL) {
 
@@ -623,14 +569,11 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
 
 	g_free(tmpstr);
 
-#ifdef HAVE_LIBGDA_4
+
 	mgd->priv->parser = gda_connection_create_parser (connection);
 	if (!mgd->priv->parser)
 		mgd->priv->parser = gda_sql_parser_new();
 	g_assert (mgd->priv->parser != NULL);
-#else 
-	mgd->priv->client = client;
-#endif
 
 	mgd->priv->connection = connection;
 	midgard_core_connection_connect_error_callback (mgd);	
@@ -1274,11 +1217,8 @@ MidgardConnection *midgard_connection_copy(MidgardConnection *self)
 	// override private connection properties
 	new_mgd->priv->config = self->priv->config;
 	new_mgd->priv->loglevel = self->priv->loglevel;
-#ifdef HAVE_LIBGDA_4
+
 	new_mgd->priv->parser = self->priv->parser;
-#else
-	new_mgd->priv->client = self->priv->client;
-#endif
 	new_mgd->priv->connection = self->priv->connection;
 	new_mgd->priv->inherited = TRUE;
 
