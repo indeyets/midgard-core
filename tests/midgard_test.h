@@ -15,6 +15,7 @@
 #include "midgard_test_schema_object_factory.h"
 #include "midgard_test_storage.h"
 #include "midgard_test_workspace_context.h"
+#include "midgard_test_workspace.h"
 
 #define MGD_TEST_SITEGROUP_NAME "midgard_test_sitegroup"
 #define MGD_TEST_WORKSPACE_CONTEXT_PATH "/Stable/Testing/Private"
