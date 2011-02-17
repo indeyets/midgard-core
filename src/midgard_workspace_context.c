@@ -155,7 +155,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 }
 
 /**
- * midgard_workspace_context_get_workspace_names:
+ * midgard_workspace_context_list_workspace_names:
  * @self: #MidgardWorkspaceContext instance
  * @elements: location to store number or returned array's elements
  *
@@ -167,7 +167,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
  * Since: 10.05.4
  */ 
 gchar**
-midgard_workspace_context_get_workspace_names (MidgardWorkspaceContext *self, guint *elements)
+midgard_workspace_context_list_workspace_names (MidgardWorkspaceContext *self, guint *elements)
 {
 	g_return_val_if_fail (self != NULL, NULL);
 
@@ -213,7 +213,7 @@ midgard_workspace_context_get_workspace_names (MidgardWorkspaceContext *self, gu
  * @self: #MidgardWorkspaceContext
  * @name: name of the #MidgardWorkspace
  *
- * Call midgard_workspace_context_get_workspace_names() if you need all available 
+ * Call midgard_workspace_context_list_workspace_names() if you need all available 
  * #MidgardWorkspace names in given context. 
  *
  * Returns: new #MidgardWorkspace object or %NULL if there is no such named workspace in context.

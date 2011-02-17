@@ -49,7 +49,7 @@ struct _MidgardWorkspaceContextClass {
 GType 			midgard_workspace_context_get_type			(void);
 gboolean		midgard_workspace_context_exists 			(MidgardConnection *mgd, const gchar *path, GError **error);
 MidgardWorkspaceContext *midgard_workspace_context_create 			(MidgardConnection *mgd, const gchar *path, GError **error);
-gchar 			**midgard_workspace_context_get_workspace_names		(MidgardWorkspaceContext *self, guint *elements);
+gchar 			**midgard_workspace_context_list_workspace_names	(MidgardWorkspaceContext *self, guint *elements);
 MidgardWorkspace	*midgard_workspace_context_get_workspace_by_name	(MidgardWorkspaceContext *self, const gchar *name);
 
 G_END_DECLS
