@@ -22,6 +22,15 @@ void
 midgard_test_workspace_new (MidgardWorkspaceTest *mwt, gconstpointer data)
 {
 	MidgardConnection *mgd = mwt->mgd;
+
+	MidgardWorkspace *parent_workspace = midgard_workspace_new (mgd, NULL);
+	g_assert (parent_workspace != NULL);
+
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, parent_workspace);
+	g_assert (workspace != NULL);
+
+	g_object_unref (parent_workspace);
+	g_object_unref (workspace);
 }
 
 void 
