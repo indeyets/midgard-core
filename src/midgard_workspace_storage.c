@@ -30,7 +30,7 @@ midgard_workspace_storage_error_quark (void)
  *
  * Returned path may be %NULL, if given object doesn't exists in storage
  *
- * Returns (transfer none): a path, given #MidgardWorkspaceStorage is at.
+ * Returns: (transfer none): a path, given #MidgardWorkspaceStorage is at.
  * Since: 10.05.4
  */
 const gchar *
