@@ -1422,7 +1422,7 @@ midgard_connection_set_workspace (MidgardConnection *self, MidgardWorkspaceStora
 }
 
 /**
- * midgard_connection_get_context:
+ * midgard_connection_get_workspace:
  * @self: #MidgardConnection instance
  *
  * Returns: (tranfer none): #MidgardWorkspaceStorage associated with #MidgardConnection or %NULL
