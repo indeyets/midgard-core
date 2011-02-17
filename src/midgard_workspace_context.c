@@ -76,7 +76,7 @@ midgard_workspace_context_exists (MidgardConnection *mgd, const gchar *path, GEr
  *
  * If context exists at given path, a new #MidgardWorkspaceContext object is returned.
  * If doesn't, an attempt to create new context is made. That is, every single #MidgardWorkspace 
- * is checked for every given @path's named element.
+ * is checked for every named element at given path.
  *
  * Cases to return %FALSE:
  *
@@ -185,9 +185,9 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
  *
  * Get all workspace names which exist in given #MidgardWorkspaceContext.
  * Elements are returned at the same order as they exists in context's path.
- * First array element is root #MidgardWorkspace, the last one is current one.
+ * First array element is root #MidgardWorkspace, the last, is the current one.
  *
- * Returns: (array-length=1): newly allocated, NULL terminated array of strings
+ * Returns: (transfer container) (array-length=1): newly allocated, NULL terminated array of strings
  * Since: 10.05.4
  */ 
 gchar**
