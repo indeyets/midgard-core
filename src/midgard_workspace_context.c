@@ -96,6 +96,11 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 	g_return_val_if_fail (path != NULL, FALSE);
 	g_return_val_if_fail (*error == NULL || error == NULL, FALSE);
 
+	if (*path == '\0') {
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "Invalid, empty path");
+		return NULL;
+	}
+
 	MidgardWorkspaceContext *ws_ctx = NULL;
 	GError *err = NULL;
 	guint row_id;
@@ -135,9 +140,10 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 	const gchar *name = NULL;
 	MidgardWorkspace *ws_parent = NULL;
 	MidgardWorkspace *ws = NULL;
+	guint name_row_id;
 	while (tokens[j] != NULL) {
 		name = tokens[j];
-		id = midgard_core_workspace_get_col_id_by_name (mgd, name, MGD_WORKSPACE_FIELD_IDX_ID, up, &row_id);
+		id = midgard_core_workspace_get_col_id_by_name (mgd, name, MGD_WORKSPACE_FIELD_IDX_ID, up, &name_row_id);
 		/* Workspace not found, create it */
 		ws = midgard_workspace_new (mgd, ws_parent);
 		if (id == -1) {
@@ -148,7 +154,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 			}
 		} else {
 			MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-			dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
+			dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, name_row_id);
 		}
 
 		if (ws_parent)
