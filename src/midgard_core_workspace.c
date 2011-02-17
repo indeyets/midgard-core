@@ -276,10 +276,17 @@ midgard_core_workspace_get_parent_names (MidgardConnection *mgd, guint up)
 gint 
 midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path, guint *row_id, GError **error)
 {
+	g_assert (row_id != NULL);
+
+	if (path && *path == '\0') {
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
+		*row_id = 0;
+		return -1;
+	}
+
 	GError *err = NULL;
 	gchar **tokens = g_strsplit (path, "/", 0);
 	guint i = 0;
-	*row_id = 0;
 	/* If path begins with slash, first element is an empty string. Ignore it. */
 	if (*tokens[0] == '\0')
 		i++;
@@ -288,9 +295,11 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 	gint j = i;
 	gboolean valid_path = TRUE;
 	/* Validate path */
-	while (tokens[i] != NULL) {
-		if (tokens[i] == '\0') 
+	while (tokens[i] != NULL) {	
+		if (*tokens[i] == '\0') { 
 			valid_path = FALSE;
+			break;
+		}
 		i++;
 	}
 
@@ -298,6 +307,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
 		g_propagate_error (error, err);
 		g_strfreev (tokens);
+		*row_id = 0;
 		return id;
 	}
 
@@ -317,6 +327,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 	if (id == -1) {
 		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS, "WorkspaceStorage doesn't exists at given path");
 		g_propagate_error (error, err);
+		*row_id = 0;
 	}
 	
 	g_strfreev (tokens);
