@@ -37,6 +37,16 @@ struct _MidgardWorkspaceContextPrivate {
  *
  * Check if #MidgardWorkspaceContext exists at given path.
  *
+ * Cases to return %FALSE:
+ * <itemizedlist>
+ * <listitem><para>
+ * Invalid path given ( WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
+ * </para></listitem>
+ * <listitem><para>
+ * Workspace doesn't exist at given path ( WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS ) 
+ * </para></listitem>
+ * </itemizedlist>
+ *
  * Returns: %TRUE on success, %FALSE otherwise
  * Since: 10.05.4
  */ 
@@ -67,6 +77,14 @@ midgard_workspace_context_exists (MidgardConnection *mgd, const gchar *path, GEr
  * If context exists at given path, a new #MidgardWorkspaceContext object is returned.
  * If doesn't, an attempt to create new context is made. That is, every single #MidgardWorkspace 
  * is checked for every given @path's named element.
+ *
+ * Cases to return %FALSE:
+ *
+ * <itemizedlist>
+ * <listitem><para>
+ * Invalid path given ( WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
+ * </para></listitem>
+ * </itemizedlist>
  *
  * Returns: #MidgardWorkspaceConext object or %NULL
  * Since: 10.05.4
