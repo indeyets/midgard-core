@@ -28,6 +28,9 @@ midgard_core_workspace_list_all (MidgardConnection *mgd)
 {
 	g_return_if_fail (mgd != NULL);
 
+	if (!midgard_storage_exists (mgd, "MidgardWorkspace"))
+		return;
+
 	/* TODO, provide statement with parameters */
 	GString *sql = g_string_new ("SELECT ");
 	g_string_append_printf (sql, "%s, %s, %s, %s FROM %s",
