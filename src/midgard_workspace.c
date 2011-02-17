@@ -136,9 +136,13 @@ midgard_workspace_create (MidgardWorkspace *self, GError **error)
 		g_propagate_error (error, er);
 		return FALSE;
 	}
-
+	
 	MidgardWorkspace *parent_ws = self->priv->parent_ws;
 	if (parent_ws) {
+		if (parent_ws_priv->id == 0) {
+			g_warning ("Parent Workspace ID is 0. Add proper error code");
+			return FALSE;
+		}
 		self->priv->up_id = parent_ws->priv->id;
 	}
 
