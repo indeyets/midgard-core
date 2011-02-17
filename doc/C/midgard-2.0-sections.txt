@@ -25,9 +25,10 @@ MIDGARD_CONFIG_GET_CLASS
 <SECTION>
 <INCLUDE>midgard/midgard.h</INCLUDE>
 <FILE>midgard_connection</FILE>
+<TITLE>MidgardConnection</TITLE>
 GETTEXT_PACKAGE
+MidgardConnection
 MidgardConnectionClass
-MidgardConnectionPrivate
 midgard_connection_new
 midgard_connection_open
 midgard_connection_close
