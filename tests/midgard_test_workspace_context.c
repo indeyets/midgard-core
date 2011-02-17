@@ -32,7 +32,7 @@ midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconst
 }
 
 void 
-midgard_test_workspace_context_get_by_path (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+midgard_test_workspace_context_get_path (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	return;
 }
