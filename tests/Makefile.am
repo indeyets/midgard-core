@@ -35,6 +35,7 @@ nobase_SOURCES = \
 	midgard_test_storage.c \
 	midgard_test_user.c \
 	midgard_test_user_bugs.c \
+	midgard_test_workspace_context.c \
 	$(NULL)
 
 #midgard_test_SOURCES = midgard_test.c $(nobase_SOURCES)
@@ -83,6 +84,11 @@ TEST_PROGS	+= run-midgard-test-user-bugs
 bin_PROGRAMS	+= run-midgard-test-user-bugs
 run_midgard_test_user_bugs_SOURCES = run-midgard-test-user-bugs.c $(nobase_SOURCES)
 run_midgard_test_user_bugs_CPPFLAGS = $(nobase_CPPFLAGS)
+
+TEST_PROGS	+= run-midgard-test-workspace-context
+bin_PROGRAMS	+= run-midgard-test-workspace-context
+run_midgard_test_workspace_context_SOURCES = run-midgard-test-workspace-context.c $(nobase_SOURCES)
+run_midgard_test_workspace_context_CPPFLAGS = $(nobase_CPPFLAGS)
 
 TEST_PROGS      += run-midgard-test-database-provider
 bin_PROGRAMS    += run-midgard-test-database-provider
