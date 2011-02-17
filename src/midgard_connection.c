@@ -83,6 +83,7 @@ midgard_connection_private_new (void)
 	/* workspace */
 	cnc_private->has_workspace = FALSE;
 	cnc_private->workspace_model = NULL;
+	cnc_private->workspace = NULL;
 
 	return cnc_private;
 }
