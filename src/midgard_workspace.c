@@ -210,7 +210,7 @@ midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext
 		return FALSE;
 
 	guint elements;
-	gchar **names = midgard_workspace_context_get_workspace_names (context, &elements);
+	gchar **names = midgard_workspace_context_list_workspace_names (context, &elements);
 
 	/* context has no single workspace */
 	if (elements < 1) {
