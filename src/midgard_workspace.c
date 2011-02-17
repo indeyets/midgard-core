@@ -199,6 +199,8 @@ midgard_workspace_get_context (MidgardWorkspace *self)
  * Check whether @self is in gven #MidgardWorkspaceContext @context
  *
  * Returns: %TRUE on success, %FALSE otherwise
+ *
+ * Since: 10.05.4
  */
 gboolean
 midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext *context)

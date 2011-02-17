@@ -49,7 +49,7 @@ struct _MidgardWorkspace{
 
 GType 			midgard_workspace_get_type		(void);
 MidgardWorkspace	*midgard_workspace_new			(MidgardConnection *mgd, MidgardWorkspace *parent_workspace);
-gboolean		midgard_workspace_update		(MidgardWorkspace *self, GError **error);
+gboolean		midgard_workspace_create		(MidgardWorkspace *self, GError **error);
 MidgardWorkspace 	**midgard_workspace_list_children	(MidgardWorkspace *self);
 MidgardWorkspace	*midgard_workspace_get_by_path		(MidgardConnection *mgd, const gchar *path, GError **error);
 MidgardWorkspaceContext *midgard_workspace_get_context		(MidgardWorkspace *self);
