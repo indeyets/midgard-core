@@ -94,7 +94,6 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 {
 	g_return_val_if_fail (mgd != NULL, FALSE);
 	g_return_val_if_fail (path != NULL, FALSE);
-	g_return_val_if_fail (*error == NULL || error == NULL, FALSE);
 
 	if (*path == '\0') {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH, "Invalid, empty path");

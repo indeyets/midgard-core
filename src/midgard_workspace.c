@@ -81,8 +81,7 @@ MidgardWorkspace *
 midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (mgd != NULL, NULL);
-	g_return_val_if_fail (path != NULL, NULL);
-	g_return_val_if_fail (*path != '\0', NULL);
+	g_return_val_if_fail (path != NULL, NULL);	
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
 	GError *err = NULL;
