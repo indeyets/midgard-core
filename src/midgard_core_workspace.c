@@ -279,7 +279,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 	g_assert (row_id != NULL);
 
 	if (path && *path == '\0') {
-		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
 		*row_id = 0;
 		return -1;
 	}
@@ -304,7 +304,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 	}
 
 	if (!valid_path) {
-		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
+		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
 		g_propagate_error (error, err);
 		g_strfreev (tokens);
 		*row_id = 0;
@@ -325,7 +325,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 	}
 
 	if (id == -1) {
-		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS, "WorkspaceStorage doesn't exists at given path");
+		err = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS, "WorkspaceStorage doesn't exists at given path");
 		g_propagate_error (error, err);
 		*row_id = 0;
 	}

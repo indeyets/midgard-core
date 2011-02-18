@@ -40,10 +40,10 @@ struct _MidgardWorkspaceContextPrivate {
  * Cases to return %FALSE:
  * <itemizedlist>
  * <listitem><para>
- * Invalid path given ( WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
+ * Invalid path given ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
  * </para></listitem>
  * <listitem><para>
- * Workspace doesn't exist at given path ( WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS ) 
+ * Workspace doesn't exist at given path ( MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS ) 
  * </para></listitem>
  * </itemizedlist>
  *
@@ -82,7 +82,7 @@ midgard_workspace_context_exists (MidgardConnection *mgd, const gchar *path, GEr
  *
  * <itemizedlist>
  * <listitem><para>
- * Invalid path given ( WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
+ * Invalid path given ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
  * </para></listitem>
  * </itemizedlist>
  *
@@ -97,7 +97,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 	g_return_val_if_fail (*error == NULL || error == NULL, FALSE);
 
 	if (*path == '\0') {
-		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_PATH, "Invalid, empty path");
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH, "Invalid, empty path");
 		return NULL;
 	}
 
@@ -118,7 +118,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 	/* Invalid path */
 	if (id == -1 
 			&& (err->domain == MIDGARD_WORKSPACE_STORAGE_ERROR 
-				&& err->code == WORKSPACE_STORAGE_ERROR_INVALID_PATH)) {
+				&& err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH)) {
 		g_propagate_error (error, err);
 		return ws_ctx;
 	}
@@ -126,7 +126,7 @@ midgard_workspace_context_create (MidgardConnection *mgd, const gchar *path, GEr
 	/* Workspace doesn't exist. Create it */
 	if (id == -1 
 			&& (err->domain == MIDGARD_WORKSPACE_STORAGE_ERROR 
-				&& err->code == WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS)) 
+				&& err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS)) 
 		g_clear_error (&err);
 	
 	gchar **tokens = g_strsplit (path, "/", 0);
