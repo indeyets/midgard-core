@@ -110,7 +110,13 @@ midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError
  * Cases to return %FALSE:
  * <itemizedlist>
  * <listitem><para>
- * workspace with such name (either root or child one) already exists ( WORKSPACE_STORAGE_ERROR_NAME_EXISTS )
+ * Workspace with such name (either root or child one) already exists ( WORKSPACE_STORAGE_ERROR_NAME_EXISTS )
+ * </para></listitem>
+ * <listitem><para>
+ * Invalid (empty or null) name ( WORKSPACE_STORAGE_ERROR_INVALID_VALUE )
+ * </para></listitem>
+ * <listitem><para>
+ * Invalid identifier of parent workspace (if given) ( WORKSPACE_STORAGE_ERROR_INVALID_VALUE )
  * </para></listitem>
  * </itemizedlist>
  *
@@ -128,19 +134,26 @@ midgard_workspace_create (MidgardWorkspace *self, GError **error)
 
 	/* TODO, emit create signal */
 
-	GError *er = NULL;
+	gchar *workspace_name = self->priv->name;
+	if (workspace_name == NULL 
+			|| (workspace_name != NULL && *workspace_name == '\0')) {
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
+					"Invalid (empty or null) workspace's name", NULL); 
+		return FALSE;
+	}
+	
 	if (midgard_core_workspace_name_exists (self, self->priv->parent_ws)) {
-		er = g_error_new (MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_NAME_EXISTS, 
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_NAME_EXISTS, 
 				"WorkspaceStorage at path '%s' already exists", 
 				midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (self)));
-		g_propagate_error (error, er);
 		return FALSE;
 	}
 	
 	MidgardWorkspace *parent_ws = self->priv->parent_ws;
 	if (parent_ws) {
-		if (parent_ws_priv->id == 0) {
-			g_warning ("Parent Workspace ID is 0. Add proper error code");
+		if (parent_ws->priv->id == 0) {
+			g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
+					"Parent Workspace ID is 0", NULL);
 			return FALSE;
 		}
 		self->priv->up_id = parent_ws->priv->id;
