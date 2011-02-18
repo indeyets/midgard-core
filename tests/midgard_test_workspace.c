@@ -37,6 +37,47 @@ void
 midgard_test_workspace_create (MidgardWorkspaceTest *mwt, gconstpointer data)
 {
 	MidgardConnection *mgd = mwt->mgd;
+
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
+	g_object_set (workspace, "name", "MyFirstWorkspace", NULL);
+	GError *error = NULL;
+	gboolean workspace_created = midgard_workspace_create (workspace, &error);
+	g_assert (workspace_created == TRUE);
+	g_assert (error == NULL);
+
+	MidgardWorkspace *second_workspace = midgard_workspace_new (mgd, workspace);
+	g_object_set (second_workspace, "name", "MySecondWorkspace", NULL);
+	error = NULL;
+	gboolean second_workspace_created = midgard_workspace_create (second_workspace, &error);
+	g_assert (second_workspace_created == TRUE);
+	g_assert (error == NULL);
+
+	g_object_unref (workspace);
+	g_object_unref (second_workspace);
+
+	/* FAIL */
+
+	/* Empty Name */
+	workspace = midgard_workspace_new (mgd, NULL);
+	error = NULL;
+	workspace_created = midgard_workspace_create (workspace, &error);
+	g_assert (workspace_created == FALSE);
+	g_assert (error != NULL);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE);
+	g_object_unref (workspace);
+
+	/* Name exists */
+	workspace = midgard_workspace_new (mgd, NULL);
+	g_object_set (workspace, "name", MGD_TEST_WORKSPACE_NAME_STABLE, NULL);
+	error = NULL;
+	workspace_created = midgard_workspace_create (workspace, &error);
+	g_assert (workspace_created == FALSE);
+	g_assert (error != NULL);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS);
+	g_object_unref (workspace);
+
+	/* Invalid parent workspace */
+
 }
 
 void 

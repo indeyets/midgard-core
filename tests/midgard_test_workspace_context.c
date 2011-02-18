@@ -41,7 +41,7 @@ midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconst
 	workspace_context_created = midgard_workspace_context_create (mgd, "", &error);
 	g_assert (workspace_context_created == NULL);
 	g_assert (error != NULL);
-	g_assert (error->code == WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 
 	g_clear_error (&error);
 }
@@ -59,25 +59,25 @@ midgard_test_workspace_context_exists (MidgardWorkspaceContextTest *mwct, gconst
 	workspace_context_exists = midgard_workspace_context_exists (mgd, "/NOT/EXISTS", &error);
 	g_assert (workspace_context_exists == FALSE);
 	g_assert (error != NULL);
-	g_assert (error->code == WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS);
 	g_clear_error (&error);
 
 	workspace_context_exists = midgard_workspace_context_exists (mgd, "//NOT//EXISTS", &error);
 	g_assert (workspace_context_exists == FALSE);
 	g_assert (error != NULL);
-	g_assert_cmpint (error->code, ==, WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	g_assert_cmpint (error->code, ==, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 	g_clear_error (&error);
 
 	workspace_context_exists = midgard_workspace_context_exists (mgd, "", &error);
 	g_assert (workspace_context_exists == FALSE);
 	g_assert (error != NULL);
-	g_assert (error->code == WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 	g_clear_error (&error);
 
 	workspace_context_exists = midgard_workspace_context_exists (mgd, "/", &error);
 	g_assert (workspace_context_exists == FALSE);
 	g_assert (error != NULL);
-	g_assert (error->code == WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 	g_clear_error (&error);
 }
 
