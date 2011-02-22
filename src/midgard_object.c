@@ -3961,7 +3961,7 @@ gboolean midgard_object_unlock(MidgardObject *self)
  *
  * Returns: new #MidgardWorkspace object or %NULL
  * 
- * Since: 10.05.3
+ * Since: 10.05.4
  */
 MidgardWorkspace*
 midgard_object_get_workspace (MidgardObject *self)
