@@ -37,7 +37,8 @@ struct _MidgardWorkspaceStorageIFace{
 	GTypeInterface parent;	
 	MidgardWorkspaceStorageIFacePrivate *priv;
 
-	const gchar	*(*get_path)	(MidgardWorkspaceStorage *self);
+	const gchar		*(*get_path)		(MidgardWorkspaceStorage *self);
+	gboolean 		(*get_by_path)		(MidgardWorkspaceStorage *self, const gchar *path, GError **error);
 };
 
 /* WorkspaceStorage error */
@@ -53,6 +54,7 @@ typedef enum {
 
 GType			midgard_workspace_storage_get_type		(void);
 const gchar 		*midgard_workspace_storage_get_path		(MidgardWorkspaceStorage *self);
+gboolean		midgard_workspace_storage_get_by_path		(MidgardWorkspaceStorage *self, const gchar *path, GError **error);
 
 G_END_DECLS
 

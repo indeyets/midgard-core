@@ -99,29 +99,39 @@ midgard_test_workspace_get_by_path (MidgardWorkspaceTest *mwt, gconstpointer dat
 	MidgardConnection *mgd = mwt->mgd;
 
 	GError *error = NULL;
-	MidgardWorkspace *workspace = midgard_workspace_get_by_path (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
 	g_assert (workspace != NULL);
+	gboolean got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (got_by_path == TRUE);
 	g_assert (error == NULL);
 	g_object_unref (workspace);
 
-	workspace = midgard_workspace_get_by_path (mgd, "/MyFirstWorkspace", &error);
+	workspace = midgard_workspace_new (mgd, NULL);
 	g_assert (workspace != NULL);
+	got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), "/MyFirstWorkspace", &error);
+	g_assert (got_by_path == TRUE);
 	g_assert (error == NULL);
 	g_object_unref (workspace);
 
 	/* FAIL */
 	/* Path doesn't exist */
-	workspace = midgard_workspace_get_by_path (mgd, "/NOT/EXISTS", &error);
-	g_assert (workspace == NULL);
+	workspace = midgard_workspace_new (mgd, NULL);
+	g_assert (workspace != NULL);
+	got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), "/NOT/EXISTS", &error);
+	g_assert (got_by_path == FALSE);
 	g_assert (error != NULL);
 	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS);
 	g_clear_error (&error);
+	g_object_unref (workspace);
 
 	/* Path is invalid */
-	workspace = midgard_workspace_get_by_path (mgd, "", &error);
-	g_assert (workspace == NULL);
+	workspace = midgard_workspace_new (mgd, NULL);
+	g_assert (workspace != NULL);
+	got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), "", &error);
+	g_assert (got_by_path == FALSE);
 	g_assert (error != NULL);
 	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	g_object_unref (workspace);
 }
 
 void 
@@ -130,8 +140,10 @@ midgard_test_workspace_list_children (MidgardWorkspaceTest *mwt, gconstpointer d
 	MidgardConnection *mgd = mwt->mgd;
 
 	GError *error = NULL;
-	MidgardWorkspace *workspace = midgard_workspace_get_by_path (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
 	g_assert (workspace != NULL);
+	gboolean got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (got_by_path == TRUE);
 	g_assert (error == NULL);
 
 	//MidgardWorkspace **children = midgard_workspace_
@@ -148,7 +160,9 @@ midgard_test_workspace_get_context (MidgardWorkspaceTest *mwt, gconstpointer dat
 	MidgardConnection *mgd = mwt->mgd;
 
 	GError *error = NULL;
-	MidgardWorkspace *workspace = midgard_workspace_get_by_path (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
+	g_assert (workspace != NULL);
+	gboolean got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
 	g_assert (workspace != NULL);
 	g_assert (error == NULL);
 
@@ -171,8 +185,9 @@ midgard_test_workspace_is_in_context (MidgardWorkspaceTest *mwt, gconstpointer d
 	MidgardConnection *mgd = mwt->mgd;
 
 	GError *error = NULL;
-	MidgardWorkspace *workspace = midgard_workspace_get_by_path (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace != NULL);
+	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
+	gboolean got_by_path = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (got_by_path == TRUE);
 	g_assert (error == NULL);
 
 	MidgardWorkspaceContext *ws_ctx = midgard_workspace_get_context (workspace);
@@ -188,5 +203,3 @@ midgard_test_workspace_is_in_context (MidgardWorkspaceTest *mwt, gconstpointer d
 	g_object_unref (ws_ctx);
 	g_object_unref (ctx);
 }
-
-

@@ -279,11 +279,18 @@ midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceContext *self, 
 	}
 
 	MidgardConnection *mgd = self->priv->mgd;
-	MidgardWorkspace *ws = midgard_workspace_get_by_path (mgd, (const gchar *)new_path->str, NULL);
+	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
+	if (!ws)
+		return NULL; /* FIXME, fatal error */
+	gboolean rv = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (ws), (const gchar *)new_path->str, NULL);
  	g_string_free (new_path, TRUE);
 	g_strfreev (tokens);
 
-	return ws;	
+	if (rv)
+		return ws;
+
+	g_object_unref (ws);
+	return NULL;	
 }
 
 static GSList*
@@ -305,9 +312,42 @@ _midgard_workspace_context_iface_get_id (MidgardWorkspaceStorage *self)
 static GObjectClass *parent_class = NULL;
 
 const gchar *
-_midgard_workspace_context_get_path (MidgardWorkspaceStorage *self)
+_midgard_workspace_context_get_path (MidgardWorkspaceStorage *wss)
 {
-	return (const gchar *) MIDGARD_WORKSPACE_CONTEXT (self)->priv->path;
+	g_return_val_if_fail (wss != NULL, NULL);
+	
+	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
+	MidgardConnection *mgd = self->priv->mgd;
+	g_return_val_if_fail (mgd != NULL, NULL);
+
+	guint ws_id = self->priv->workspace_id;
+	const GValue *up_val = midgard_core_workspace_get_value_by_id (mgd, MGD_WORKSPACE_FIELD_IDX_UP, ws_id, NULL);
+	guint up_id = 0;
+	if (G_VALUE_HOLDS_UINT (up_val))
+		up_id = g_value_get_uint (up_val);
+	else
+		up_id = (guint) g_value_get_int (up_val);
+
+	GSList *list = midgard_core_workspace_get_parent_names (mgd, up_id);
+	GSList *l;
+	GString *str = g_string_new ("");
+	
+	for (l = list; l != NULL; l = l->next) {
+		gchar *name = (gchar *) l->data;
+		g_string_append_printf (str, "/%s", name);
+	}
+	
+	if (list)
+		g_slist_free (list);
+
+	const GValue *name_value = midgard_core_workspace_get_value_by_id (mgd, MGD_WORKSPACE_FIELD_IDX_NAME, ws_id, NULL);
+
+	g_string_append_printf (str, "/%s", g_value_get_string (name_value));
+	
+	g_free (self->priv->path);
+	self->priv->path = g_string_free (str, FALSE);
+	
+	return (const gchar *) self->priv->path;
 }
 
 static void

@@ -766,6 +766,7 @@ MIDGARD_SCHEMA_OBJECT_TREE_GET_CLASS
 <TITLE>MidgardWorkspaceStorage</TITLE>
 MidgardWorkspaceStorage
 midgard_workspace_storage_get_path
+midgard_workspace_storage_get_by_path
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE_STORAGE
 MIDGARD_IS_WORKSPACE_STORAGE
@@ -803,7 +804,6 @@ MidgardWorkspaceClass
 midgard_workspace_new
 midgard_workspace_update
 midgard_workspace_list_children
-midgard_workspace_get_by_path
 midgard_workspace_get_context
 midgard_workspace_is_in_context
 <SUBSECTION Standard>

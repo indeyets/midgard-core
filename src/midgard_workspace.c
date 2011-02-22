@@ -58,31 +58,16 @@ midgard_workspace_new (MidgardConnection *mgd, MidgardWorkspace *parent_workspac
 	return self;
 }
 
-/**
- * midgard_workspace_get_by_path:
- * @mgd: #MidgardConnection instance
- * @path: a path #MidgardWorkspace object should be found at (e.g. /Organization/Users/John)
- * @error: a pointer to store returned error
- * 
- * Cases to return %NULL:
- * <itemizedlist>
- * <listitem><para>
- * Given path is invalid ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH )
- * </para></listitem>
- * <listitem><para>
- * WorkspaceStorageStorage at given path doesn't exist ( MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS )
- * </para></listitem>
- * </itemizedlist>
- *
- * Returns: new #MidgardWorkspace instance if found, %NULL otherwise
- * Since: 10.05.4
- */
-MidgardWorkspace *
-midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError **error)
+gboolean
+_midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
-	g_return_val_if_fail (mgd != NULL, NULL);
-	g_return_val_if_fail (path != NULL, NULL);	
-	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+	g_return_val_if_fail (wss != NULL, FALSE);
+	g_return_val_if_fail (path != NULL, FALSE);	
+	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+	MidgardWorkspace *self = MIDGARD_WORKSPACE (wss);
+	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	g_return_val_if_fail (mgd != NULL, FALSE);
 
 	GError *err = NULL;
 	gint id = 0;
@@ -91,14 +76,13 @@ midgard_workspace_get_by_path (MidgardConnection *mgd, const gchar *path, GError
 
 	if (id == -1) {
 		g_propagate_error (error, err);
-		return NULL;
+		return FALSE;
 	}
 
-	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
-	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
+	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (self);
+	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (self), mgd->priv->workspace_model, row_id);
 
-	return ws;
+	return TRUE;
 }
 
 /**
@@ -336,6 +320,7 @@ static void
 _midgard_workspace_iface_init (MidgardWorkspaceStorageIFace *iface)
 {
 	iface->get_path = _midgard_workspace_get_path;
+	iface->get_by_path = _midgard_workspace_get_by_path;
 	iface->priv = g_new (MidgardWorkspaceStorageIFacePrivate, 1);
         iface->priv->list_ids = _midgard_workspace_iface_list_ids;
 	iface->priv->get_id = _midgard_workspace_iface_get_id;
@@ -658,7 +643,7 @@ static void _midgard_workspace_class_init(
 	/* name */
 	property_name = "name";
 	pspec = g_param_spec_string (property_name,
-			"WorkspaceStorageStorage name",
+			"WorkspaceStorage name",
 			"",
 			"",
 			G_PARAM_READWRITE);

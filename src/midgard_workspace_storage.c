@@ -17,6 +17,7 @@
  */
 
 #include "midgard_workspace_storage.h"
+#include "midgard_core_object.h"
 
 GQuark
 midgard_workspace_storage_error_quark (void)
@@ -39,6 +40,36 @@ midgard_workspace_storage_get_path (MidgardWorkspaceStorage *self)
 	g_return_val_if_fail (self != NULL, NULL);
 
 	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_path (self);
+}
+
+
+/**
+ * midgard_workspace_storage_get_by_path:
+ * @self: #MidgardWorkspaceStorage instance
+ * @path: a path #MidgardWorkspaceStorage object should be found at (e.g. /Organization/Users/John)
+ * @error: a pointer to store returned error
+ * 
+ * Cases to return %NULL:
+ * <itemizedlist>
+ * <listitem><para>
+ * Given path is invalid ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH )
+ * </para></listitem>
+ * <listitem><para>
+ * WorkspaceStorageStorage at given path doesn't exist ( MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS )
+ * </para></listitem>
+ * </itemizedlist>
+ *
+ * Returns: %TRUE if workspace is found at given path, %FALSE otherwise
+ * Since: 10.05.4
+ */
+gboolean
+midgard_workspace_storage_get_by_path (MidgardWorkspaceStorage *self, const gchar *path, GError **error)
+{
+	g_return_val_if_fail (self != NULL, FALSE);
+	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	g_return_val_if_fail (mgd != NULL, FALSE);
+
+	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_by_path (self, path, error);
 }
 
 GType
