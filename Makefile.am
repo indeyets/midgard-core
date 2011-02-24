@@ -84,6 +84,7 @@ midgard_public_h = \
 	src/midgard_view.h \
 	src/midgard_workspace.h \
 	src/midgard_workspace_context.h \
+	src/midgard_workspace_manager.h \
 	src/midgard_workspace_storage.h \
 	$(NULL)
 
@@ -206,6 +207,7 @@ src_libmidgard2_la_public_SOURCES = \
 	src/midgard_view.c \
 	src/midgard_workspace.c \
 	src/midgard_workspace_context.c \
+	src/midgard_workspace_manager.c \
 	src/midgard_workspace_storage.c \
 	$(NULL)
 
