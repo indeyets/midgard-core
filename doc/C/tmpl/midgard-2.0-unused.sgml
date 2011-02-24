@@ -163,6 +163,12 @@ midgard_tree
 </para>
 
 
+<!-- ##### STRUCT MidgardConnectionPrivate ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### STRUCT MidgardRequestConfig ##### -->
 <para>
 
@@ -1866,6 +1872,25 @@ midgard_tree
 
 </para>
 
+
+<!-- ##### FUNCTION midgard_workspace_get_by_path ##### -->
+<para>
+
+</para>
+
+@mgd: 
+@path: 
+@error: 
+@Returns: 
+
+<!-- ##### FUNCTION midgard_workspace_update ##### -->
+<para>
+
+</para>
+
+@self: 
+@error: 
+@Returns: 
 
 <!-- ##### FUNCTION set_created ##### -->
 <para>

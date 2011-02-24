@@ -29,3 +29,4 @@ midgard_schema_object_factory_get_type
 midgard_workspace_storage_get_type
 midgard_workspace_context_get_type
 midgard_workspace_get_type
+midgard_workspace_manager_get_type

@@ -89,12 +89,6 @@ MidgardConnection
 </para>
 
 
-<!-- ##### STRUCT MidgardConnectionPrivate ##### -->
-<para>
-
-</para>
-
-
 <!-- ##### FUNCTION midgard_connection_new ##### -->
 <para>
 
