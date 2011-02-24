@@ -23,6 +23,7 @@
 #include "midgard_workspace.h"
 #include "midgard_workspace_context.h"
 #include "midgard_workspace_storage.h"
+#include "midgard_workspace_manager.h"
 
 G_BEGIN_DECLS
 
@@ -49,8 +50,14 @@ struct _MidgardWorkspacePrivate {
 };
 
 struct _MidgardWorkspaceStorageIFacePrivate {
-	GSList	*(*list_ids)	(MidgardWorkspaceStorage *self);
-	guint	(*get_id)	(MidgardWorkspaceStorage *self);
+	GSList		*(*list_ids)	(MidgardWorkspaceStorage *self);
+	guint		(*get_id)	(MidgardWorkspaceStorage *self);
+	gboolean	(*create)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*update)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*purge)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*path_exists)	(MidgardWorkspaceManager *manager, const gchar *path);
+	gboolean	(*get_by_path)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
+
 };
 
 void		midgard_core_workspace_list_all			(MidgardConnection *mgd);

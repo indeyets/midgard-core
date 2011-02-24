@@ -20,6 +20,7 @@
 #include "midgard_core_workspace.h"
 #include "midgard_workspace_storage.h"
 #include "midgard_workspace.h"
+#include "midgard_workspace_manager.h"
 #include "midgard_core_object.h"
 
 struct _MidgardWorkspaceContextPrivate {
@@ -350,10 +351,17 @@ _midgard_workspace_context_get_path (MidgardWorkspaceStorage *wss)
 	return (const gchar *) self->priv->path;
 }
 
+static gboolean 
+_midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error)
+{
+	return FALSE;
+}
+
 static void
 _midgard_workspace_context_iface_init (MidgardWorkspaceStorageIFace *iface)
 {
 	iface->get_path = _midgard_workspace_context_get_path;
+	iface->get_by_path = _midgard_workspace_context_get_by_path;
 	iface->priv = g_new (MidgardWorkspaceStorageIFacePrivate, 1);
 	iface->priv->list_ids = _midgard_workspace_context_iface_list_ids;
 	iface->priv->get_id = _midgard_workspace_context_iface_get_id;
