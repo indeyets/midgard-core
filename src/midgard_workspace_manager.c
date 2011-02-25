@@ -22,10 +22,6 @@
 #include "midgard_workspace.h"
 #include "midgard_core_object.h"
 
-struct _MidgardWorkspaceManagerPrivate {
-	MidgardConnection *mgd;
-};
-
 /**
  * midgard_workspace_manager_new:
  * @mgd: #MidgardConnection instance
@@ -49,10 +45,15 @@ midgard_workspace_manager_new (MidgardConnection *mgd)
  * midgard_workspace_manager_create:
  * @self: #MidgardWorkspaceManager instance
  * @ws: #MidgardWorkspaceStorage instance to create
+ * @path: path at which workspace object should be created
  * @error: (error-domains MIDGARD_WORKSPACE_STORAGE_ERROR): pointer to store error
  *
  * Create given #MidgardWorkspaceStorage instance in underlying storage. 
- * A valid path should be set for workspace object.
+ * If given #MidgardWorkspaceStorage is #MidgardWorkspaceContext, then it's created 
+ * at given path and context's path is set. 
+ * If it's #MidgardWorkspace, it's created at given path with its name, which also creates
+ * new context. (e.g. if the path is '/Organization/Branch' and workspace name is 'Private', 
+ * then its accessible with '/Organization/Branch/Private' path.)
  *
  * Cases to return %FALSE:
  *
@@ -69,12 +70,18 @@ midgard_workspace_manager_new (MidgardConnection *mgd)
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_create (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
+midgard_workspace_manager_create (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->create (self, ws, error);
+	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->create (self, ws, error);
+	if (rv) {
+		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->manager = self;
+		midgard_core_workspace_list_all (self->priv->mgd);
+		/* TODO, emit signal */
+	}
+	return rv;
 }
 
 /**
@@ -109,7 +116,13 @@ midgard_workspace_manager_update (MidgardWorkspaceManager *self, MidgardWorkspac
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->update (self, ws, error);
+	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->update (self, ws, error);
+
+	/* TODO, 
+	 * midgard_core_workspace_list_all (mgd);
+	 * if (rv) emit signal */
+
+	return rv;
 }
 
 /**
@@ -138,7 +151,13 @@ midgard_workspace_manager_purge (MidgardWorkspaceManager *self, MidgardWorkspace
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->purge (self, ws, error);
+	gboolean rv MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->purge (self, ws, error);
+
+	/* TODO, 
+	 * midgard_core_workspace_list_all (mgd);
+	 * if (rv) emit signal */
+
+	return rv;
 }
 
 /**
@@ -193,7 +212,12 @@ midgard_workspace_manager_get_workspace_by_path (MidgardWorkspaceManager *self, 
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->get_by_path (self, ws, path, error);
+	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->get_by_path (self, ws, path, error);
+
+	if (rv) {
+		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->manager = self;
+	}
+	return rv;
 }
 
 /* GOBJECT ROUTINES */

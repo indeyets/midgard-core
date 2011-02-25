@@ -51,9 +51,9 @@ struct _MidgardWorkspaceManager{
 
 GType 			midgard_workspace_manager_get_type		(void);
 MidgardWorkspaceManager	*midgard_workspace_manager_new			(MidgardConnection *mgd);
-gboolean 		midgard_workspace_manager_create		(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error);
+gboolean 		midgard_workspace_manager_create		(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error);
 gboolean 		midgard_workspace_manager_update		(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error);
-gboolean 		midgard_workspace_manager_delete		(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error);
+gboolean 		midgard_workspace_manager_purge			(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error);
 gboolean 		midgard_workspace_manager_path_exists		(MidgardWorkspaceManager *self, const gchar *path);
 gboolean		midgard_workspace_manager_get_by_path 		(MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error);
 

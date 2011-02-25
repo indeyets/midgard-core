@@ -33,31 +33,6 @@
 #include "midgard_query_constraint.h"
 #include "midgard_query_constraint_group.h"
 
-/**
- * midgard_wrokspace_new:
- * @mgd: #MidgardConnection instance
- * @parent_workspace: (allow none): parent #MidgardWorkspace for given one
- *
- * If created, new workspace will be created under @parent_workspace if given not %NULL.
- * In other case, new instance is assumed top most workspace.
- *
- * Returns: #MidgardWorkspace object or %NULL
- * Since: 10.05.4
- */ 
-MidgardWorkspace *
-midgard_workspace_new (MidgardConnection *mgd, MidgardWorkspace *parent_workspace)
-{
-	g_return_val_if_fail (mgd != NULL, NULL);
-
-	MidgardWorkspace *self = NULL;
-	if (!parent_workspace)
-		self = g_object_new (MIDGARD_TYPE_WORKSPACE, "connection", mgd, NULL);
-	else
-		self = g_object_new (MIDGARD_TYPE_WORKSPACE, "connection", mgd, "parent_workspace", parent_workspace, NULL);
-
-	return self;
-}
-
 gboolean
 _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
@@ -85,37 +60,15 @@ _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path,
 	return TRUE;
 }
 
-/**
- * midgard_workspace_create:
- * @self: #MidgardWorkspace instance
- * @error: pointer to store returned error 
- *
- * Cases to return %FALSE:
- * <itemizedlist>
- * <listitem><para>
- * Workspace with such name (either root or child one) already exists ( MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS )
- * </para></listitem>
- * <listitem><para>
- * Invalid (empty or null) name ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE )
- * </para></listitem>
- * <listitem><para>
- * Invalid identifier of parent workspace (if given) ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE )
- * </para></listitem>
- * </itemizedlist>
- *
- * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
- */
 gboolean 
-midgard_workspace_create (MidgardWorkspace *self, GError **error)
+_midgard_workspace_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+	g_return_val_if_fail (manager != NULL, FALSE);
+	g_return_val_if_fail (ws != NULL, FALSE);
 
-	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
-	g_return_val_if_fail (MIDGARD_IS_CONNECTION (mgd), FALSE);
-
-	/* TODO, emit create signal */
+	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
+	MidgardConnection *mgd = manager->priv->mgd;
+	g_return_val_if_fail (mgd != NULL, FALSE);
 
 	gchar *workspace_name = self->priv->name;
 	if (workspace_name == NULL 
@@ -124,23 +77,17 @@ midgard_workspace_create (MidgardWorkspace *self, GError **error)
 					"Invalid (empty or null) workspace's name", NULL); 
 		return FALSE;
 	}
-	
-	if (midgard_core_workspace_name_exists (self, self->priv->parent_ws)) {
+
+	if (midgard_workspace_manager_path_exists (manager, path)) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS, 
-				"WorkspaceStorage at path '%s' already exists", 
-				midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (self)));
+				"WorkspaceStorage at path '%s/%s' already exists", 
+				path, workspace_name);
 		return FALSE;
 	}
 	
-	MidgardWorkspace *parent_ws = self->priv->parent_ws;
-	if (parent_ws) {
-		if (parent_ws->priv->id == 0) {
-			g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
-					"Parent Workspace ID is 0", NULL);
-			return FALSE;
-		}
-		self->priv->up_id = parent_ws->priv->id;
-	}
+	MidgardWorkspaceContext *context = midgard_workspace_context_new ();
+
+	/* TODO, set parent workspace */
 
 	/* Create */
 	MIDGARD_DBOBJECT(self)->dbpriv->guid = (const gchar *) midgard_guid_new (mgd);
@@ -179,16 +126,28 @@ midgard_workspace_create (MidgardWorkspace *self, GError **error)
  * Returns: #MidgardWorkspaceContext @self is in or %NULL
  * Since: 10.05.4
  */
-MidgardWorkspaceContext*
+const MidgardWorkspaceContext*
 midgard_workspace_get_context (MidgardWorkspace *self)
 {
 	g_return_val_if_fail (self != NULL, NULL);
 
-	const gchar *path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (self));
-	if (!path)
-		return NULL;
+	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	const MidgardWorkspaceContext *context = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->context;
 
-	return midgard_workspace_context_create (MGD_OBJECT_CNC (self), path, NULL);
+	if (context)
+		return context;
+
+	context = g_object_new (MIDGARD_TYPE_WORKSPACE_CONTEXT, NULL);
+	const gchar *path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (self));
+	gboolean rv = midgard_workspace_manager_get_workspace_by_path (manager, context, path, NULL);
+
+	if (rv) {
+		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->context = (const MidgardWorkspaceContext *)context;
+		return context;
+	}
+	
+	g_object_unref ((gpointer) context);
+	return NULL;
 }
 
 /**
@@ -320,19 +279,31 @@ static void
 _midgard_workspace_iface_init (MidgardWorkspaceStorageIFace *iface)
 {
 	iface->get_path = _midgard_workspace_get_path;
-	iface->get_by_path = _midgard_workspace_get_by_path;
+
 	iface->priv = g_new (MidgardWorkspaceStorageIFacePrivate, 1);
+	iface->priv->manager = NULL;
+	iface->priv->context = NULL;
         iface->priv->list_ids = _midgard_workspace_iface_list_ids;
 	iface->priv->get_id = _midgard_workspace_iface_get_id;
+	iface->priv->create = _midgard_workspace_create;
+	iface->priv->update = _midgard_workspace_update;
+	iface->priv->purge = _midgard_workspace_purge;
+	iface->priv->get_by_path = _midgard_workspace_get_by_path;
 	return;
 }
 
 static void
 _midgard_workspace_iface_finalize (MidgardWorkspaceStorageIFace *iface)
 {
-	if (iface->priv)
-		g_free (iface->priv);
+	if (!iface->priv)
+	return;
+	
+	iface->priv->manager = NULL;
+	iface->priv->context = NULL;
+
+	g_free (iface->priv);
 	iface->priv = NULL;
+
 	return;
 }
 

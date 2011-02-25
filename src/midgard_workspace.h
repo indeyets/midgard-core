@@ -47,12 +47,8 @@ struct _MidgardWorkspace{
 	MidgardWorkspacePrivate *priv;
 };
 
-GType 			midgard_workspace_get_type		(void);
-MidgardWorkspace	*midgard_workspace_new			(MidgardConnection *mgd, MidgardWorkspace *parent_workspace);
-gboolean		midgard_workspace_create		(MidgardWorkspace *self, GError **error);
-MidgardWorkspace 	**midgard_workspace_list_children	(MidgardWorkspace *self);
-MidgardWorkspaceContext *midgard_workspace_get_context		(MidgardWorkspace *self);
-gboolean		midgard_workspace_is_in_context		(MidgardWorkspace *self, MidgardWorkspaceContext *context);
+GType 				midgard_workspace_get_type		(void);
+const MidgardWorkspaceContext	*midgard_workspace_get_context		(MidgardWorkspace *self);
 
 G_END_DECLS
 

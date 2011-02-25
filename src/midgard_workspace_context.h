@@ -46,11 +46,9 @@ struct _MidgardWorkspaceContextClass {
 	GObjectClass parent;
 };
 
-GType 			midgard_workspace_context_get_type			(void);
-gboolean		midgard_workspace_context_exists 			(MidgardConnection *mgd, const gchar *path, GError **error);
-MidgardWorkspaceContext *midgard_workspace_context_create 			(MidgardConnection *mgd, const gchar *path, GError **error);
-gchar 			**midgard_workspace_context_list_workspace_names	(MidgardWorkspaceContext *self, guint *elements);
-MidgardWorkspace	*midgard_workspace_context_get_workspace_by_name	(MidgardWorkspaceContext *self, const gchar *name);
+GType 			midgard_workspace_context_get_type		(void);
+MidgardWorkspaceContext *midgard_workspace_context_new			(void);
+gboolean		*midgard_workspace_context_has_workspace	(MidgardWorkspaceContext *self, MidgardWorkspace *workspace);
 
 G_END_DECLS
 

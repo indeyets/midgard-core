@@ -42,34 +42,55 @@ midgard_workspace_storage_get_path (MidgardWorkspaceStorage *self)
 	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_path (self);
 }
 
+/**
+ * midgard_workspace_storage_get_workspace_by_name:
+ * @self: #MidgardWorkspaceStorage instance
+ * @name: a name of #MidgardWorkspaceStorage object to find
+ *
+ * Returns: newly allocated #MidgardWorkspaceStorage object if found, %NULL otherwise
+ * Since: 10.05.4
+ */ 
+MidgardWorkspaceStorage *
+midgard_workspace_storage_get_workspace_by_name (MidgardWorkspaceStorage *self, const gchar *name)
+{
+	g_return_val_if_fail (self != NULL, NULL);
+
+	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_workspace_by_name (self);
+}
 
 /**
- * midgard_workspace_storage_get_by_path:
+ * midgard_workspace_storage_list_children:
  * @self: #MidgardWorkspaceStorage instance
- * @path: a path #MidgardWorkspaceStorage object should be found at (e.g. /Organization/Users/John)
- * @error: a pointer to store returned error
- * 
- * Cases to return %NULL:
- * <itemizedlist>
- * <listitem><para>
- * Given path is invalid ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH )
- * </para></listitem>
- * <listitem><para>
- * WorkspaceStorageStorage at given path doesn't exist ( MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS )
- * </para></listitem>
- * </itemizedlist>
+ * @n_objects: a pointer to store number of returned objects
  *
- * Returns: %TRUE if workspace is found at given path, %FALSE otherwise
+ * In case of #MidgardWorkspaceContext, all #MidgardWorkspace objects from context are 
+ * returned. 
+ *
+ * Returns: (array length=n_objects): newly allocated array of #MidgardWorkspaceStorage objects
  * Since: 10.05.4
- */
-gboolean
-midgard_workspace_storage_get_by_path (MidgardWorkspaceStorage *self, const gchar *path, GError **error)
+ */ 
+MidgardWorkspaceStorage **
+midgard_workspace_storage_list_children (MidgardWorkspaceStorage *self, guint *n_objects)
 {
-	g_return_val_if_fail (self != NULL, FALSE);
-	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
-	g_return_val_if_fail (mgd != NULL, FALSE);
+	g_return_val_if_fail (self != NULL, NULL);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_by_path (self, path, error);
+	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->list_children (self, n_objects);
+}
+
+/**
+ * midgard_workspace_storage_list_workspace_names:
+ * @self: #MidgardWorkspaceStorage instance
+ * @n_names: a pointer to store number of returned names
+ * 
+ * Returns: (transfer: container) (array length=n_names): array of names
+ * Since: 10.05.4
+ */ 
+gchar **
+midgard_workspace_storage_list_workspace_names (MidgardWorkspaceStorage *self, guint *n_names)
+{
+	g_return_val_if_fail (self != NULL, NULL);
+
+	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->list_workspace_names (self, n_names);
 }
 
 GType
