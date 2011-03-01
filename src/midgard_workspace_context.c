@@ -43,11 +43,12 @@ midgard_workspace_context_new ()
 }
 
 static gboolean 
-_midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error)
+_midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
-	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (wss != NULL, FALSE);
 
+	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
 	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, FALSE);	
 
@@ -91,12 +92,14 @@ _midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWork
 		name = tokens[j];
 		id = midgard_core_workspace_get_col_id_by_name (mgd, name, MGD_WORKSPACE_FIELD_IDX_ID, up, &name_row_id);
 		/* Workspace not found, create it */
-		ws = midgard_workspace_new (mgd, ws_parent);
+		ws = midgard_workspace_new ();
 		if (id == -1) {
 			g_object_set (ws, "name", name, NULL);
-			if (!midgard_workspace_create (ws, NULL)) {
-				/* FIXME, handle error */
-				g_error ("Failed to create workspace in path");
+			if (!midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (ws), "FIXMEFIXME", &err)) {
+				if (err)
+					g_propagate_error (error, err);
+				g_object_unref (ws);
+				return FALSE;
 			}
 		} else {
 			MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
@@ -108,6 +111,7 @@ _midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWork
 		ws_parent = ws;
 
 		up = ws->priv->id;
+		g_object_unref (ws);
 		j++;
 	}
 
@@ -122,7 +126,7 @@ _midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWork
 
 	/* FIXME, connect to manager create signal */
 
-	return ws_ctx;
+	return TRUE;
 }
 
 static gboolean 
@@ -152,11 +156,12 @@ _midgard_workspace_context_purge (MidgardWorkspaceManager *manager, MidgardWorks
 }
 
 static gboolean
-_midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error)
+_midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
-	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (wss != NULL, FALSE);
 
+	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
 	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, FALSE);	
 
@@ -179,13 +184,15 @@ _midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, Midgar
 	return FALSE;
 }
 
-static gchar**
-_midgard_workspace_context_list_workspace_names (MidgardWorkspaceContext *self, guint *elements)
+static gchar **
+_midgard_workspace_context_list_workspace_names (MidgardWorkspaceStorage *wss, guint *elements)
 {
-	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (wss != NULL, NULL);
 
+	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
 	gchar *path = self->priv->path;
-	*elements = 0;
+	if (elements)
+		*elements = 0;
 
 	if (!path)
 		return NULL;
@@ -202,7 +209,8 @@ _midgard_workspace_context_list_workspace_names (MidgardWorkspaceContext *self, 
 	}
 
 	/* Initialize NULL terminated array */
-	*elements = j;
+	if (elements)
+		*elements = j;
 	gchar **names = g_new (gchar *, j+1);
 	i = 0;
 	j = 0;
@@ -221,12 +229,14 @@ _midgard_workspace_context_list_workspace_names (MidgardWorkspaceContext *self, 
 	return names;
 }
 
-static MidgardWorkspace*
-_midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceContext *self, const gchar *name)
+static MidgardWorkspaceStorage*
+_midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceStorage *wss, const gchar *name)
 {
-	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (wss != NULL, NULL);
 	g_return_val_if_fail (name != NULL, NULL);
 
+	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
+	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
 	gchar *path = self->priv->path;
 
 	if (!path)
@@ -258,19 +268,26 @@ _midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceContext *self,
 	}
 
 	MidgardConnection *mgd = self->priv->mgd;
-	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
+	MidgardWorkspace *ws = midgard_workspace_new ();
 	if (!ws)
 		return NULL; /* FIXME, fatal error */
-	gboolean rv = midgard_workspace_storage_get_by_path (MIDGARD_WORKSPACE_STORAGE (ws), (const gchar *)new_path->str, NULL);
+	gboolean rv = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (ws), (const gchar *)new_path->str, NULL);
  	g_string_free (new_path, TRUE);
 	g_strfreev (tokens);
 
 	if (rv)
-		return ws;
+		return MIDGARD_WORKSPACE_STORAGE (ws);
 
 	g_object_unref (ws);
 	return NULL;	
 }
+
+static MidgardWorkspaceStorage **
+_midgard_workspace_context_list_children (MidgardWorkspaceStorage *wss, guint *n_objects)
+{
+	return NULL;
+}
+
 
 static GSList*
 _midgard_workspace_context_iface_list_ids (MidgardWorkspaceStorage *self)
@@ -296,7 +313,7 @@ _midgard_workspace_context_get_path (MidgardWorkspaceStorage *wss)
 	g_return_val_if_fail (wss != NULL, NULL);
 	
 	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
-	MidgardConnection *mgd = self->priv->manager->mgd;
+	MidgardConnection *mgd = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager->priv->mgd;
 	if (!mgd)
 		return NULL;
 
@@ -330,12 +347,6 @@ _midgard_workspace_context_get_path (MidgardWorkspaceStorage *wss)
 	return (const gchar *) self->priv->path;
 }
 
-static gboolean 
-_midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error)
-{
-	return FALSE;
-}
-
 static void
 _midgard_workspace_context_iface_init (MidgardWorkspaceStorageIFace *iface)
 {
@@ -347,14 +358,13 @@ _midgard_workspace_context_iface_init (MidgardWorkspaceStorageIFace *iface)
 
 	/* Private implementation, WorkspaceManager helpers */ 
 	iface->priv = g_new (MidgardWorkspaceStorageIFacePrivate, 1);
-	iface->manager = NULL;
-	iface->context = NULL;
+	iface->priv->manager = NULL;
+	iface->priv->context = NULL;
 	iface->priv->list_ids = _midgard_workspace_context_iface_list_ids;
 	iface->priv->get_id = _midgard_workspace_context_iface_get_id;
 	iface->priv->create = _midgard_workspace_context_create;
 	iface->priv->update = _midgard_workspace_context_update;
 	iface->priv->purge = _midgard_workspace_context_purge;
-	iface->priv->path_exists = _midgard_workspace_context_path_exists;
 	iface->priv->get_by_path = _midgard_workspace_context_get_by_path;
 	return;
 }
@@ -365,8 +375,8 @@ _midgard_workspace_context_iface_finalize (MidgardWorkspaceStorageIFace *iface)
 	if (!iface->priv)
 		return;
 
-	iface->manager = NULL;
-	iface->context = NULL;
+	iface->priv->manager = NULL;
+	iface->priv->context = NULL;
 
 	g_free (iface->priv);
 	iface->priv = NULL;

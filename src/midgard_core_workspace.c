@@ -336,7 +336,7 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 
 	/* Set error, even if we return ID. It helps to check if given path exists. */
 	g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, 
-			MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_PATH_EXISTS, "Given path '%s' already exists.", path);
+			MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS, "Given path '%s' already exists.", path);
 
 	g_strfreev (tokens);
 	return id;

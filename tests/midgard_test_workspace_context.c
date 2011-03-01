@@ -22,27 +22,28 @@ void
 midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
 
 	GError *error = NULL;
-	MidgardWorkspaceContext *workspace_context_created = midgard_workspace_context_create (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace_context_created != NULL);
-	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context_created));
+	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_new ();
+	g_assert (workspace_context != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context));
+	
+	gboolean workspace_context_created = midgard_workspace_manager_create (manager, workspace_context, MGD_TEST_WORKSPACE_PATH, &error);
+	g_assert (workspace_created != TRUE);
 	g_assert (error == NULL);
 
-	MidgardWorkspaceContext *workspace_context_fetched = midgard_workspace_context_create (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace_context_created != NULL);
-	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context_created));
-	g_assert (error == NULL);
-
-	g_object_unref (workspace_context_created);
-	g_object_unref (workspace_context_fetched);
+	g_object_unref (workspace_context);
 
 	/* FAIL */
-	workspace_context_created = midgard_workspace_context_create (mgd, "", &error);
-	g_assert (workspace_context_created == NULL);
+	MidgardWorkspaceContext *dummy_context = midgard_workspace_context_new ();
+	workspace_context_created = midgard_workspace_manager_create (manager, dummy_context, "", &error);
+	g_assert (workspace_context_created == FALSE);
 	g_assert (error != NULL);
 	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 
+	g_object_unref (dummy_context);
 	g_clear_error (&error);
 }
 
@@ -50,35 +51,24 @@ void
 midgard_test_workspace_context_exists (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
 
-	GError *error = NULL;
-	gboolean workspace_context_exists = midgard_workspace_context_exists (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	gboolean workspace_context_exists = midgard_workspace_manager_path_exists (manager, MGD_TEST_WORKSPACE_CONTEXT_PATH);
 	g_assert (workspace_context_exists == TRUE);
-	g_assert (error == NULL);
 
-	workspace_context_exists = midgard_workspace_context_exists (mgd, "/NOT/EXISTS", &error);
+	/* FAIL */
+	workspace_context_exists = midgard_workspace_manager_path_exists (manager, "/NOT/EXISTS");
 	g_assert (workspace_context_exists == FALSE);
-	g_assert (error != NULL);
-	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS);
-	g_clear_error (&error);
 
-	workspace_context_exists = midgard_workspace_context_exists (mgd, "//NOT//EXISTS", &error);
+	workspace_context_exists = midgard_workspace_manager_path_exists (manager, "//NOT/EXISTS");
 	g_assert (workspace_context_exists == FALSE);
-	g_assert (error != NULL);
-	g_assert_cmpint (error->code, ==, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
-	g_clear_error (&error);
 
-	workspace_context_exists = midgard_workspace_context_exists (mgd, "", &error);
+	workspace_context_exists = midgard_workspace_manager_path_exists (manager, "");
 	g_assert (workspace_context_exists == FALSE);
-	g_assert (error != NULL);
-	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
-	g_clear_error (&error);
 
-	workspace_context_exists = midgard_workspace_context_exists (mgd, "/", &error);
+	workspace_context_exists = midgard_workspace_manager_path_exists (manager, "/");
 	g_assert (workspace_context_exists == FALSE);
-	g_assert (error != NULL);
-	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
-	g_clear_error (&error);
 }
 
 void 

@@ -59,7 +59,7 @@ struct _MidgardWorkspaceStorageIFacePrivate {
 
 	GSList		*(*list_ids)	(MidgardWorkspaceStorage *self);
 	guint		(*get_id)	(MidgardWorkspaceStorage *self);
-	gboolean	(*create)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*create)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
 	gboolean	(*update)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
 	gboolean	(*purge)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
 	gboolean	(*path_exists)	(MidgardWorkspaceManager *manager, const gchar *path);

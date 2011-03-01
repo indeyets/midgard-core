@@ -48,6 +48,7 @@ struct _MidgardWorkspace{
 };
 
 GType 				midgard_workspace_get_type		(void);
+MidgardWorkspace		*midgard_workspace_new			();
 const MidgardWorkspaceContext	*midgard_workspace_get_context		(MidgardWorkspace *self);
 
 G_END_DECLS

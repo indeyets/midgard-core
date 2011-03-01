@@ -55,7 +55,7 @@ midgard_workspace_storage_get_workspace_by_name (MidgardWorkspaceStorage *self, 
 {
 	g_return_val_if_fail (self != NULL, NULL);
 
-	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_workspace_by_name (self);
+	return MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->get_workspace_by_name (self, name);
 }
 
 /**

@@ -84,6 +84,7 @@ midgard_connection_private_new (void)
 	cnc_private->has_workspace = FALSE;
 	cnc_private->workspace_model = NULL;
 	cnc_private->workspace = NULL;
+	cnc_private->workspace_manager = NULL;
 
 	return cnc_private;
 }
@@ -131,6 +132,10 @@ static void _midgard_connection_finalize(GObject *object)
 			self->priv->workspace_model = NULL;
 		}
 	}
+
+	if (self->priv->workspace_manager)
+		g_object_unref (self->priv->workspace_manager);
+	self->priv->workspace_manager = NULL;
 
 	if (self->priv->copy_config)
 		g_object_unref (self->priv->copy_config);
@@ -1322,7 +1327,7 @@ midgard_connection_enable_dbus (MidgardConnection *self, gboolean toggle)
  *
  * Enable or disable workspace (and contexts) support
  *
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 void
 midgard_connection_enable_workspace (MidgardConnection *self, gboolean toggle)
@@ -1382,7 +1387,7 @@ midgard_connection_is_enabled_dbus (MidgardConnection *self)
  *
  * Returns: %TRUE, if workspace support is enabled, %FALSE otherwise
  * 
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean                
 midgard_connection_is_enabled_workspace (MidgardConnection *self)
@@ -1402,7 +1407,7 @@ midgard_connection_is_enabled_workspace (MidgardConnection *self)
  * of #MidgardWorkspace which limits workspace scope to given one only.
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_connection_set_workspace (MidgardConnection *self, MidgardWorkspaceStorage *workspace)
@@ -1427,7 +1432,7 @@ midgard_connection_set_workspace (MidgardConnection *self, MidgardWorkspaceStora
  * @self: #MidgardConnection instance
  *
  * Returns: (tranfer none): #MidgardWorkspaceStorage associated with #MidgardConnection or %NULL
- * Since: 10.05.4
+ * Since: 10.05.5
  */
 const MidgardWorkspaceStorage*
 midgard_connection_get_workspace (MidgardConnection *self)
@@ -1438,4 +1443,21 @@ midgard_connection_get_workspace (MidgardConnection *self)
 		return NULL;
 
 	return MIDGARD_WORKSPACE_STORAGE (self->priv->workspace);
+}
+
+/**
+ * midgard_connection_get_workspace_manager:
+ * @self: #MidgardConnection instance
+ *
+ * Returns: (transfer none): #MidgardWorkspaceManager associated with given connection instance.
+ * Since: 10.05.5
+ */
+const MidgardWorkspaceManager *
+midgard_connection_get_workspace_manager (MidgardConnection *self)
+{
+	g_return_val_if_fail (self != NULL, NULL);
+	if (!self->priv->workspace_manager)
+		self->priv->workspace_manager = midgard_workspace_manager_new (self);
+
+	return self->priv->workspace_manager;
 }

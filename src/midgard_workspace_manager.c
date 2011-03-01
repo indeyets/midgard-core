@@ -75,7 +75,7 @@ midgard_workspace_manager_create (MidgardWorkspaceManager *self, MidgardWorkspac
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->create (self, ws, error);
+	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->create (self, ws, path, error);
 	if (rv) {
 		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->manager = self;
 		midgard_core_workspace_list_all (self->priv->mgd);
@@ -151,7 +151,7 @@ midgard_workspace_manager_purge (MidgardWorkspaceManager *self, MidgardWorkspace
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
-	gboolean rv MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->purge (self, ws, error);
+	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->purge (self, ws, error);
 
 	/* TODO, 
 	 * midgard_core_workspace_list_all (mgd);

@@ -33,6 +33,22 @@
 #include "midgard_query_constraint.h"
 #include "midgard_query_constraint_group.h"
 
+/**
+ * midgard_workspace_new:
+ *
+ * Simplified constructor.
+ *
+ * Returns: #MidgardWorkspace instance
+ * Since: 10.05.5
+ */ 
+MidgardWorkspace *
+midgard_workspace_new ()
+{
+	MidgardWorkspace *self = g_object_new (MIDGARD_TYPE_WORKSPACE, NULL);
+	return self;
+}
+
+
 gboolean
 _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
@@ -60,7 +76,7 @@ _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path,
 	return TRUE;
 }
 
-gboolean 
+static gboolean 
 _midgard_workspace_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
@@ -119,12 +135,24 @@ _midgard_workspace_create (MidgardWorkspaceManager *manager, MidgardWorkspaceSto
 	return FALSE;
 }
 
+static gboolean 
+_midgard_workspace_update (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
+{
+	return FALSE;
+}
+
+static gboolean 
+_midgard_workspace_purge (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
+{
+	return FALSE;
+}
+
 /**
  * midgard_workspace_get_context:
  * @self: #MidgardWorkspace instance
  *
  * Returns: #MidgardWorkspaceContext @self is in or %NULL
- * Since: 10.05.4
+ * Since: 10.05.5
  */
 const MidgardWorkspaceContext*
 midgard_workspace_get_context (MidgardWorkspace *self)
@@ -159,7 +187,7 @@ midgard_workspace_get_context (MidgardWorkspace *self)
  *
  * Returns: %TRUE on success, %FALSE otherwise
  *
- * Since: 10.05.4
+ * Since: 10.05.5
  */
 gboolean
 midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext *context)
@@ -171,7 +199,7 @@ midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext
 		return FALSE;
 
 	guint elements;
-	gchar **names = midgard_workspace_context_list_workspace_names (context, &elements);
+	gchar **names = midgard_workspace_storage_list_workspace_names (MIDGARD_WORKSPACE_STORAGE (context), &elements);
 
 	/* context has no single workspace */
 	if (elements < 1) {
@@ -198,7 +226,7 @@ midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext
 	}
 
 	/* Get named workspace from context and check if id equals*/
-	MidgardWorkspace *tmp = midgard_workspace_context_get_workspace_by_name (context, name);
+	MidgardWorkspace *tmp = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), name);
 	g_strfreev (names);
 	if (!tmp)
 		return FALSE;
