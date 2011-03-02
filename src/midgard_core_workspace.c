@@ -276,8 +276,6 @@ midgard_core_workspace_get_parent_names (MidgardConnection *mgd, guint up)
 gint 
 midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path, guint *row_id, GError **error)
 {
-	g_assert (row_id != NULL);
-
 	if (path && *path == '\0') {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, 
 				MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH, "An empty element found in given path");
