@@ -77,13 +77,14 @@ _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path,
 }
 
 static gboolean 
-_midgard_workspace_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
+_midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
 	MidgardConnection *mgd = manager->priv->mgd;
+	MGD_OBJECT_CNC (self) = mgd;
 	g_return_val_if_fail (mgd != NULL, FALSE);
 
 	gchar *workspace_name = self->priv->name;
@@ -136,13 +137,13 @@ _midgard_workspace_create (MidgardWorkspaceManager *manager, MidgardWorkspaceSto
 }
 
 static gboolean 
-_midgard_workspace_update (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
+_midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
 {
 	return FALSE;
 }
 
 static gboolean 
-_midgard_workspace_purge (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
+_midgard_workspace_purge (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
 {
 	return FALSE;
 }
@@ -159,15 +160,15 @@ midgard_workspace_get_context (MidgardWorkspace *self)
 {
 	g_return_val_if_fail (self != NULL, NULL);
 
-	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
-	const MidgardWorkspaceContext *context = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->context;
+	const MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	MidgardWorkspaceContext *context = (MidgardWorkspaceContext *)MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->context;
 
 	if (context)
 		return context;
 
 	context = g_object_new (MIDGARD_TYPE_WORKSPACE_CONTEXT, NULL);
 	const gchar *path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (self));
-	gboolean rv = midgard_workspace_manager_get_workspace_by_path (manager, context, path, NULL);
+	gboolean rv = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (context), path, NULL);
 
 	if (rv) {
 		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->context = (const MidgardWorkspaceContext *)context;
@@ -226,7 +227,7 @@ midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext
 	}
 
 	/* Get named workspace from context and check if id equals*/
-	MidgardWorkspace *tmp = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), name);
+	MidgardWorkspace *tmp = (MidgardWorkspace *)midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), name);
 	g_strfreev (names);
 	if (!tmp)
 		return FALSE;
@@ -370,6 +371,9 @@ _midgard_workspace_dispose (GObject *object)
 		g_object_unref (self->priv->parent_ws);
 		self->priv->parent_ws = NULL;
 	}
+
+	/* Nullify MidgardConnection pointer, it's not set explicitly for this class. */
+	MGD_OBJECT_CNC (self) = NULL;
 
 	__parent_class->dispose (object);
 }

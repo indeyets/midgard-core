@@ -55,11 +55,11 @@ typedef enum {
 
 #define MIDGARD_WORKSPACE_STORAGE_ERROR midgard_workspace_storage_error_quark ()
 
-GType			midgard_workspace_storage_get_type		(void);
-const gchar 		*midgard_workspace_storage_get_path		(MidgardWorkspaceStorage *self);
-MidgardWorkspaceStorage	**list_children					(MidgardWorkspaceStorage *self, guint *n_objects);
-MidgardWorkspaceStorage	*get_workspace_by_name				(MidgardWorkspaceStorage *self, const gchar *name);
-gchar 			**list_workspace_names				(MidgardWorkspaceStorage *self, guint *n_names);
+GType			midgard_workspace_storage_get_type			(void);
+const gchar 		*midgard_workspace_storage_get_path			(MidgardWorkspaceStorage *self);
+MidgardWorkspaceStorage	**midgard_workspace_storage_list_children		(MidgardWorkspaceStorage *self, guint *n_objects);
+MidgardWorkspaceStorage	*midgard_workspace_storage_get_workspace_by_name	(MidgardWorkspaceStorage *self, const gchar *name);
+gchar 			**midgard_workspace_storage_list_workspace_names	(MidgardWorkspaceStorage *self, guint *n_names);
 G_END_DECLS
 
 #endif /* MIDGARD_WORKSPACE_STORAGE_H */

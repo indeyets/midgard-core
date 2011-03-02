@@ -43,7 +43,7 @@ midgard_workspace_context_new ()
 }
 
 static gboolean 
-_midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
+_midgard_workspace_context_create (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (wss != NULL, FALSE);
@@ -130,7 +130,7 @@ _midgard_workspace_context_create (MidgardWorkspaceManager *manager, MidgardWork
 }
 
 static gboolean 
-_midgard_workspace_context_update (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error)
+_midgard_workspace_context_update (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (self != NULL, FALSE);
@@ -143,7 +143,7 @@ _midgard_workspace_context_update (MidgardWorkspaceManager *manager, MidgardWork
 }
 
 static gboolean 
-_midgard_workspace_context_purge (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error)
+_midgard_workspace_context_purge (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (self != NULL, FALSE);
@@ -156,7 +156,7 @@ _midgard_workspace_context_purge (MidgardWorkspaceManager *manager, MidgardWorks
 }
 
 static gboolean
-_midgard_workspace_context_get_by_path (MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
+_midgard_workspace_context_get_by_path (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (wss != NULL, FALSE);
@@ -236,7 +236,7 @@ _midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceStorage *wss, 
 	g_return_val_if_fail (name != NULL, NULL);
 
 	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (wss);
-	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	const MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
 	gchar *path = self->priv->path;
 
 	if (!path)

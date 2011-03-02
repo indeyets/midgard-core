@@ -70,7 +70,7 @@ midgard_workspace_manager_new (MidgardConnection *mgd)
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_create (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
+midgard_workspace_manager_create (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
@@ -111,7 +111,7 @@ midgard_workspace_manager_create (MidgardWorkspaceManager *self, MidgardWorkspac
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_update (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
+midgard_workspace_manager_update (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
@@ -146,7 +146,7 @@ midgard_workspace_manager_update (MidgardWorkspaceManager *self, MidgardWorkspac
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_purge (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
+midgard_workspace_manager_purge (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
@@ -171,7 +171,7 @@ midgard_workspace_manager_purge (MidgardWorkspaceManager *self, MidgardWorkspace
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_path_exists (MidgardWorkspaceManager *self, const gchar *path)
+midgard_workspace_manager_path_exists (const MidgardWorkspaceManager *self, const gchar *path)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (path != NULL, FALSE);
@@ -207,7 +207,7 @@ midgard_workspace_manager_path_exists (MidgardWorkspaceManager *self, const gcha
  * Since: 10.05.4
  */ 
 gboolean
-midgard_workspace_manager_get_workspace_by_path (MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
+midgard_workspace_manager_get_workspace_by_path (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
