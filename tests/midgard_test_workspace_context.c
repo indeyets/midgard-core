@@ -31,7 +31,7 @@ midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconst
 	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context));
 	
 	gboolean workspace_context_created = midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace_context_created != TRUE);
+	g_assert (workspace_context_created == TRUE);
 	g_assert (error == NULL);
 
 	g_object_unref (workspace_context);
