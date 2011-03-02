@@ -327,17 +327,20 @@ midgard_core_workspace_get_id_by_path (MidgardConnection *mgd, const gchar *path
 		j++;
 	}
 
+	g_strfreev (tokens);
+
 	if (id == -1) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, 
 				MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS, "WorkspaceStorage doesn't exists at given path");
 		if (row_id)
 			*row_id = 0;
+
+		return id;
 	}
 
 	/* Set error, even if we return ID. It helps to check if given path exists. */
 	g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, 
 			MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS, "Given path '%s' already exists.", path);
 
-	g_strfreev (tokens);
 	return id;
 }
