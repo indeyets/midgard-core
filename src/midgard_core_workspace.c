@@ -57,7 +57,8 @@ midgard_core_workspace_get_col_id_by_name (MidgardConnection *mgd, const gchar *
 	g_return_val_if_fail (mgd != NULL, -1);
 	g_return_val_if_fail (name != NULL, -1);
 
-	*row_id = 0;
+	if (row_id)
+		*row_id = 0;
 	guint row;
 	GdaDataModel *model = mgd->priv->workspace_model;
 	/* model is not initialized, which means there's no workspace created yet */
@@ -85,7 +86,8 @@ midgard_core_workspace_get_col_id_by_name (MidgardConnection *mgd, const gchar *
 
 		const GValue *nval = gda_data_model_get_value_at (model, MGD_WORKSPACE_FIELD_IDX_NAME, row, NULL);	
 		if (g_str_equal (name, g_value_get_string (nval))) {
-			*row_id = row;
+			if (row_id)
+				*row_id = row;
 			const GValue *colval = gda_data_model_get_value_at (model, col_idx, row, NULL);
 			if (G_VALUE_HOLDS_UINT (colval))
 				return (gint) g_value_get_uint (colval);
