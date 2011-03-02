@@ -54,16 +54,16 @@ struct _MidgardWorkspaceManagerPrivate {
 };
 
 struct _MidgardWorkspaceStorageIFacePrivate {
-	MidgardWorkspaceManager *manager;
+	const MidgardWorkspaceManager *manager;
 	const MidgardWorkspaceContext *context;
 
 	GSList		*(*list_ids)	(MidgardWorkspaceStorage *self);
 	guint		(*get_id)	(MidgardWorkspaceStorage *self);
-	gboolean	(*create)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
-	gboolean	(*update)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
-	gboolean	(*purge)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
-	gboolean	(*path_exists)	(MidgardWorkspaceManager *manager, const gchar *path);
-	gboolean	(*get_by_path)	(MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
+	gboolean	(*create)	(const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
+	gboolean	(*update)	(const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*purge)	(const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, GError **error);
+	gboolean	(*path_exists)	(const MidgardWorkspaceManager *manager, const gchar *path);
+	gboolean	(*get_by_path)	(const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);
 };
 
 void		midgard_core_workspace_list_all			(MidgardConnection *mgd);
