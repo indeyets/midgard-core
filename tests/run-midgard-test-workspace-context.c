@@ -57,14 +57,24 @@ int main (int argc, char *argv[])
 
 	g_test_add("/midgard_workspace_context/create", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_create, midgard_test_workspace_context_teardown_foo);
+	g_test_add("/midgard_workspace_context/update", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
+			midgard_test_workspace_context_update, midgard_test_workspace_context_teardown_foo);
+	g_test_add("/midgard_workspace_context/purge", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
+			midgard_test_workspace_context_purge, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/exists", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_exists, midgard_test_workspace_context_teardown_foo);
+	g_test_add("/midgard_workspace_context/get_by_path", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
+			midgard_test_workspace_context_get_by_path, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/get_path", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_get_path, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/list_workspace_names", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_list_workspace_names, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/get_workspace_by_name", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_get_workspace_by_name, midgard_test_workspace_context_teardown_foo);
+	g_test_add("/midgard_workspace_context/list_children", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
+			midgard_test_workspace_context_create, midgard_test_workspace_context_teardown_foo);
+	g_test_add("/midgard_workspace_context/has_workspace", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
+			midgard_test_workspace_context_create, midgard_test_workspace_context_teardown_foo);
 
 	/* Finalize */
 	///_MGD_TEST_UNREF_GOBJECT(user)

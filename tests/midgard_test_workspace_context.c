@@ -30,21 +30,33 @@ midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconst
 	g_assert (workspace_context != NULL);
 	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context));
 	
-	gboolean workspace_context_created = midgard_workspace_manager_create (manager, workspace_context, MGD_TEST_WORKSPACE_PATH, &error);
-	g_assert (workspace_created != TRUE);
+	gboolean workspace_context_created = midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (workspace_context_created != TRUE);
 	g_assert (error == NULL);
 
 	g_object_unref (workspace_context);
 
 	/* FAIL */
 	MidgardWorkspaceContext *dummy_context = midgard_workspace_context_new ();
-	workspace_context_created = midgard_workspace_manager_create (manager, dummy_context, "", &error);
+	workspace_context_created = midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (dummy_context), "", &error);
 	g_assert (workspace_context_created == FALSE);
 	g_assert (error != NULL);
 	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
 
 	g_object_unref (dummy_context);
 	g_clear_error (&error);
+}
+
+void 
+midgard_test_workspace_context_update (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+{
+	g_warning (MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_context_purge (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+{
+	g_warning (MISS_IMPL);
 }
 
 void 
@@ -72,37 +84,57 @@ midgard_test_workspace_context_exists (MidgardWorkspaceContextTest *mwct, gconst
 }
 
 void 
+midgard_test_workspace_context_get_by_path (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+{
+	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_warning (MISS_IMPL);
+}
+
+void 
 midgard_test_workspace_context_get_path (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
 
 	GError *error = NULL;
-	MidgardWorkspaceContext *workspace_context_fetched = midgard_workspace_context_create (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace_context_fetched != NULL);
-	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context_fetched));
+	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_new ();
+	g_assert (workspace_context != NULL);
+
+	const gchar *workspace_context_path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (workspace_context));
+	g_assert (workspace_context_path == NULL);
+
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (get_by_path != FALSE);
 	g_assert (error == NULL);
 
-	const gchar *workspace_context_path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (workspace_context_fetched));
+	workspace_context_path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (workspace_context));
 	g_assert (workspace_context_path != NULL);
 	g_assert_cmpstr (workspace_context_path,  !=,  "");
 	g_assert_cmpstr (workspace_context_path, ==, MGD_TEST_WORKSPACE_CONTEXT_PATH);
 
-	g_object_unref (workspace_context_fetched);
+	g_object_unref (workspace_context);
 }
 
 void 
 midgard_test_workspace_context_list_workspace_names (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
 
 	GError *error = NULL;
-	MidgardWorkspaceContext *workspace_context_fetched = midgard_workspace_context_create (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
-	g_assert (workspace_context_fetched != NULL);
-	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context_fetched));
+	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_new ();
+	g_assert (workspace_context != NULL);
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (get_by_path != FALSE);
 	g_assert (error == NULL);
 
 	guint n_names;
-	gchar **workspace_names = midgard_workspace_context_list_workspace_names (workspace_context_fetched, &n_names);
+	gchar **workspace_names = midgard_workspace_storage_list_workspace_names (MIDGARD_WORKSPACE_STORAGE (workspace_context), &n_names);
 	g_assert (workspace_names != NULL);
 	g_assert_cmpint (n_names, !=, 0);
 
@@ -110,32 +142,66 @@ midgard_test_workspace_context_list_workspace_names (MidgardWorkspaceContextTest
 	g_assert_cmpstr (workspace_names[1], ==, MGD_TEST_WORKSPACE_NAME_TESTING);
 	g_assert_cmpstr (workspace_names[2], ==, MGD_TEST_WORKSPACE_NAME_PRIVATE);
 
-	g_object_unref (workspace_context_fetched);
+	g_object_unref (workspace_context);
 	g_free (workspace_names);
+
+	/* FAIL */
+	workspace_context = midgard_workspace_context_new ();
+	g_assert (workspace_context != NULL);
+
+	workspace_names = midgard_workspace_storage_list_workspace_names (MIDGARD_WORKSPACE_STORAGE (workspace_context), &n_names);
+	g_assert (workspace_names == NULL);
+	g_assert (n_names == 0);
+	
+	/* Check if NULL value instead of storage pointer is safe */
+	workspace_names = midgard_workspace_storage_list_workspace_names (MIDGARD_WORKSPACE_STORAGE (workspace_context), NULL);
+	g_assert (workspace_names == NULL);
+
+	g_object_unref (workspace_context);
 }
 
 void 
 midgard_test_workspace_context_get_workspace_by_name (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
 	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
 
 	GError *error = NULL;
-	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_create (mgd, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_new ();
 	g_assert (workspace_context != NULL);
-	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace_context));
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (get_by_path != FALSE);
 	g_assert (error == NULL);
 
-	MidgardWorkspace *workspace = midgard_workspace_context_get_workspace_by_name (workspace_context, MGD_TEST_WORKSPACE_NAME_STABLE);
+	MidgardWorkspaceStorage *workspace = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_NAME_STABLE);
 	g_assert (workspace != NULL);
 	g_object_unref (workspace);
 
-	workspace = midgard_workspace_context_get_workspace_by_name (workspace_context, MGD_TEST_WORKSPACE_NAME_TESTING);
+	workspace = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_NAME_TESTING);
 	g_assert (workspace != NULL);
 	g_object_unref (workspace);
 
-	workspace = midgard_workspace_context_get_workspace_by_name (workspace_context, MGD_TEST_WORKSPACE_NAME_PRIVATE);
+	workspace = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_NAME_PRIVATE);
 	g_assert (workspace != NULL);
 	g_object_unref (workspace);
+
+	/* FAIL */
+	workspace = midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (workspace_context), "");
+	g_assert (workspace == NULL);
 
 	g_object_unref (workspace_context);
 }
+
+void 
+midgard_test_workspace_context_list_children (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+{
+	g_warning (MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_context_has_workspace (MidgardWorkspaceContextTest *mwct, gconstpointer data)
+{
+	g_warning (MISS_IMPL);
+}
+
