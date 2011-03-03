@@ -72,9 +72,9 @@ int main (int argc, char *argv[])
 	g_test_add("/midgard_workspace_context/get_workspace_by_name", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
 			midgard_test_workspace_context_get_workspace_by_name, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/list_children", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
-			midgard_test_workspace_context_create, midgard_test_workspace_context_teardown_foo);
+			midgard_test_workspace_context_list_children, midgard_test_workspace_context_teardown_foo);
 	g_test_add("/midgard_workspace_context/has_workspace", MidgardWorkspaceContextTest, mwc, midgard_test_workspace_context_setup,  
-			midgard_test_workspace_context_create, midgard_test_workspace_context_teardown_foo);
+			midgard_test_workspace_context_has_workspace, midgard_test_workspace_context_teardown_foo);
 
 	/* Finalize */
 	///_MGD_TEST_UNREF_GOBJECT(user)

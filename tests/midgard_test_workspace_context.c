@@ -50,13 +50,31 @@ midgard_test_workspace_context_create (MidgardWorkspaceContextTest *mwct, gconst
 void 
 midgard_test_workspace_context_update (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
-	g_warning (MISS_IMPL);
+	MidgardConnection *mgd = mwct->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	MidgardWorkspaceContext *context = midgard_workspace_context_new ();
+	g_assert (context != NULL);
+	GError *error = NULL;
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (get_by_path == TRUE);
+	g_assert (error == NULL);
+
+	/* COre doesn't update context, FAIL */
+	gboolean update = midgard_workspace_manager_update (manager, MIDGARD_WORKSPACE_STORAGE (context), &error);
+	g_assert (update == FALSE);
+	g_assert (error != NULL);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_CONTEXT_VIOLATION);
+
+	g_object_unref (context);
+
 }
 
 void 
 midgard_test_workspace_context_purge (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
-	g_warning (MISS_IMPL);
+	g_print ("Purge context: %s \n", MISS_IMPL);
 }
 
 void 
@@ -90,7 +108,35 @@ midgard_test_workspace_context_get_by_path (MidgardWorkspaceContextTest *mwct, g
 	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
 	g_assert (manager != NULL);
 
-	g_warning (MISS_IMPL);
+	GError *error = NULL;
+	MidgardWorkspaceContext *context = midgard_workspace_context_new ();
+	g_assert (context != NULL);
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);	
+	g_assert (get_by_path == TRUE);
+	g_assert (error == NULL);
+
+	g_object_unref (context);
+
+	/* FAIL */
+	context = midgard_workspace_context_new ();
+	g_assert (context != NULL);
+	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (context), "", &error);	
+	g_assert (get_by_path == FALSE);
+	g_assert (error != NULL);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH);
+	
+	g_clear_error (&error);
+	g_object_unref (context);
+
+	context = midgard_workspace_context_new ();
+	g_assert (context != NULL);
+	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (context), "/NOT/EXIST", &error);	
+	g_assert (get_by_path == FALSE);
+	g_assert (error != NULL);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS);
+	
+	g_clear_error (&error);
+	g_object_unref (context);
 }
 
 void 
@@ -196,12 +242,13 @@ midgard_test_workspace_context_get_workspace_by_name (MidgardWorkspaceContextTes
 void 
 midgard_test_workspace_context_list_children (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
-	g_warning (MISS_IMPL);
+	g_print ("list_children: %s \n", MISS_IMPL);
 }
 
 void 
 midgard_test_workspace_context_has_workspace (MidgardWorkspaceContextTest *mwct, gconstpointer data)
 {
-	g_warning (MISS_IMPL);
+	g_print ("has_workspace: %s \n", MISS_IMPL);
+
 }
 
