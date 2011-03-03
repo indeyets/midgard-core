@@ -50,14 +50,13 @@ midgard_workspace_new ()
 
 
 gboolean
-_midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
+_midgard_workspace_get_by_path (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *wss, const gchar *path, GError **error)
 {
 	g_return_val_if_fail (wss != NULL, FALSE);
 	g_return_val_if_fail (path != NULL, FALSE);	
-	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (wss);
-	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, FALSE);
 
 	GError *err = NULL;
