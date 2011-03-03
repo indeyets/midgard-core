@@ -77,10 +77,14 @@ _midgard_workspace_get_by_path (MidgardWorkspaceStorage *wss, const gchar *path,
 }
 
 static gboolean 
-_midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
+_midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, const gchar *_path, GError **error)
 {
 	g_return_val_if_fail (manager != NULL, FALSE);
 	g_return_val_if_fail (ws != NULL, FALSE);
+
+	const gchar *path = _path;
+	if (path == NULL)
+		path = "";
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
 	MidgardConnection *mgd = manager->priv->mgd;
@@ -95,19 +99,45 @@ _midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorksp
 		return FALSE;
 	}
 
-	if (midgard_workspace_manager_path_exists (manager, path)) {
+	GString *ws_path = g_string_new ("");
+	g_string_append_printf (ws_path, "%s/%s", path, workspace_name);
+
+	if (midgard_workspace_manager_path_exists (manager, ws_path->str)) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS, 
 				"WorkspaceStorage at path '%s/%s' already exists", 
 				path, workspace_name);
+		g_string_free (ws_path, TRUE);
 		return FALSE;
 	}
 	
-	MidgardWorkspaceContext *context = midgard_workspace_context_new ();
+	GError *err = NULL;
+	gint up_id = 0;
 
-	/* TODO, set parent workspace */
+	/* Ignore empty path, we're going to create root workspace */
+	if (*path != '\0') {
+		up_id = midgard_core_workspace_get_id_by_path (mgd, path, NULL, &err);	
+		if (err && err->code) {
+			if (err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_OBJECT_NOT_EXISTS) {
+				if (up_id == -1) 
+					up_id = 0;
+				g_clear_error (&err);	
+			} else if (err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS
+					|| err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS) {
+				g_clear_error (&err);
+			} else {
+				g_propagate_error (error, err);
+				g_string_free (ws_path, TRUE);
+				return FALSE;
+			}
+		}
+	}
 
-	/* Create */
+	/* TODO, set parent workspace, if needed 
+	 * MidgardWorkspaceContext *context = midgard_workspace_context_new (); */
+
+	/* Create, set guid and up id */
 	MIDGARD_DBOBJECT(self)->dbpriv->guid = (const gchar *) midgard_guid_new (mgd);
+	self->priv->up_id = up_id;
 	if (midgard_core_query_create_dbobject_record (MIDGARD_DBOBJECT (self))) {
 		/* TODO ?, emit created signal */
 		/* Refresh available workspaces model */
@@ -117,13 +147,17 @@ _midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorksp
 		guint row_id;
 		gint id = midgard_core_workspace_get_col_id_by_name (mgd, self->priv->name, MGD_WORKSPACE_FIELD_IDX_ID, self->priv->up_id, &row_id);
 		if (id < 1) {
-			g_warning ("Newly created workspace id is not unique (%d)", id);
+			g_warning ("Newly created workspace (%s) id is not unique (%d)", ws_path->str, id);
 			/* TODO, set error and delete workspace from database */
+			g_string_free (ws_path, TRUE);
 			return FALSE;
 		}
 		self->priv->id = id;
+		g_string_free (ws_path, TRUE);
 		return TRUE;
 	}
+
+	g_string_free (ws_path, TRUE);
 
 	/* Create failed, reset values */
 	g_free ((gchar *)MGD_OBJECT_GUID (self));

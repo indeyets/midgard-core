@@ -85,38 +85,42 @@ _midgard_workspace_context_create (const MidgardWorkspaceManager *manager, Midga
 	guint j = i;
 	guint up = 0;
 	const gchar *name = NULL;
-	MidgardWorkspace *ws_parent = NULL;
 	MidgardWorkspace *ws = NULL;
 	guint name_row_id;
+	GString *dpath = g_string_new ("");
+
+	gboolean rv = TRUE;
 	while (tokens[j] != NULL) {
 		name = tokens[j];
-		id = midgard_core_workspace_get_col_id_by_name (mgd, name, MGD_WORKSPACE_FIELD_IDX_ID, up, &name_row_id);
-		/* Workspace not found, create it */
+		if (j > 1) /* Ignore empty string */
+			g_string_append_printf (dpath, "/%s", tokens[j-1]);
+
+		/* Try to create workspace */
 		ws = midgard_workspace_new ();
-		if (id == -1) {
-			g_object_set (ws, "name", name, NULL);
-			if (!midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (ws), "FIXMEFIXME", &err)) {
-				if (err)
-					g_propagate_error (error, err);
+		g_object_set (ws, "name", name, NULL);	
+		if (!midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (ws), dpath->str, &err)) {
+			if (err && (err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS
+						|| err->code == MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS)) {
+				rv = FALSE;		
+			} else {
+				g_propagate_error (error, err);
 				g_object_unref (ws);
+				g_string_free (dpath, TRUE);
 				return FALSE;
 			}
-		} else {
-			MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-			dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, name_row_id);
+
+			if (err)
+				g_clear_error (&err);
 		}
 
-		if (ws_parent)
-			g_object_unref (ws_parent);
-		ws_parent = ws;
-
-		up = ws->priv->id;
+		id = ws->priv->id;
 		g_object_unref (ws);
+
 		j++;
 	}
 
-	if (ws_parent && G_IS_OBJECT (ws_parent))
-		g_object_unref (ws_parent);
+	g_string_free (dpath, TRUE);
+
 	if (ws && G_IS_OBJECT (ws))
 		g_object_unref (ws);
 
@@ -126,7 +130,7 @@ _midgard_workspace_context_create (const MidgardWorkspaceManager *manager, Midga
 
 	/* FIXME, connect to manager create signal */
 
-	return TRUE;
+	return rv;
 }
 
 static gboolean 
