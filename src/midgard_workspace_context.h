@@ -48,7 +48,7 @@ struct _MidgardWorkspaceContextClass {
 
 GType 			midgard_workspace_context_get_type		(void);
 MidgardWorkspaceContext *midgard_workspace_context_new			(void);
-gboolean		*midgard_workspace_context_has_workspace	(MidgardWorkspaceContext *self, MidgardWorkspace *workspace);
+gboolean		midgard_workspace_context_has_workspace		(MidgardWorkspaceContext *self, MidgardWorkspace *workspace);
 
 G_END_DECLS
 
