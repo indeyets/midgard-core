@@ -289,9 +289,60 @@ _midgard_workspace_context_get_workspace_by_name (MidgardWorkspaceStorage *wss, 
 static MidgardWorkspaceStorage **
 _midgard_workspace_context_list_children (MidgardWorkspaceStorage *wss, guint *n_objects)
 {
-	return NULL;
+	g_return_val_if_fail (wss != NULL, NULL);
+	if (n_objects)
+		*n_objects = 0;
+
+	guint n_names;
+	gchar **names = midgard_workspace_storage_list_workspace_names (wss, &n_names);
+	if (names == NULL)
+		return NULL;
+
+	guint i = 0;
+	if (n_objects) 
+		*n_objects = n_names;
+	MidgardWorkspace **children = g_new (MidgardWorkspace*, n_names);
+	while (names[i] != NULL) {
+		
+		children[i] = MIDGARD_WORKSPACE (midgard_workspace_storage_get_workspace_by_name (wss, names[i]));		
+		i++;
+	}
+
+	g_strfreev (names);
+	children[i] = NULL;
+
+	return (MidgardWorkspaceStorage **) children;
 }
 
+gboolean
+midgard_workspace_context_has_workspace (MidgardWorkspaceContext *self, MidgardWorkspace *workspace)
+{
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (workspace != NULL, FALSE);
+
+	gboolean rv = FALSE;
+	GSList *ids = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->list_ids (MIDGARD_WORKSPACE_STORAGE (self));
+	if (!ids)
+		return rv;
+
+	GSList *l;
+	guint ws_id = 0;
+	for (l = ids; l != NULL; l = l->next) {
+		GValue *val = (GValue *) l->data;
+		if (G_VALUE_HOLDS_UINT (val))
+			ws_id = g_value_get_uint (val);
+		else 
+			ws_id = g_value_get_int (val);
+
+		if (ws_id == workspace->priv->id) {
+			rv = TRUE;
+			break;
+		}
+	}
+	
+	g_slist_free (ids);
+	return rv;
+}
 
 static GSList*
 _midgard_workspace_context_iface_list_ids (MidgardWorkspaceStorage *self)
