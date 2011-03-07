@@ -378,6 +378,9 @@ _midgard_workspace_context_get_path (MidgardWorkspaceStorage *wss)
 		return NULL;
 
 	const GValue *up_val = midgard_core_workspace_get_value_by_id (mgd, MGD_WORKSPACE_FIELD_IDX_UP, ws_id, NULL);
+	if (!up_val)
+		return NULL;
+
 	guint up_id = 0;
 	if (G_VALUE_HOLDS_UINT (up_val))
 		up_id = g_value_get_uint (up_val);
