@@ -62,6 +62,9 @@ midgard_workspace_manager_new (MidgardConnection *mgd)
  * Invalid path given ( MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_PATH ) 
  * </para></listitem>
  * <listitem><para>
+ * Workspace at path already exists ( MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS ) 
+ * </para></listitem>
+ * <listitem><para>
  * Workspace at path already exists ( MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS ) 
  * </para></listitem>
  * </itemizedlist>
