@@ -32,6 +32,7 @@
 #include "midgard_query_storage.h"
 #include "midgard_query_constraint.h"
 #include "midgard_query_constraint_group.h"
+#include "midgard_error.h"
 
 /**
  * midgard_workspace_new:
@@ -172,6 +173,58 @@ _midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorksp
 static gboolean 
 _midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *ws, GError **error)
 {
+	g_return_val_if_fail (manager != NULL, FALSE);
+	g_return_val_if_fail (ws != NULL, FALSE);
+
+	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
+	MidgardConnection *mgd = manager->priv->mgd;
+	MGD_OBJECT_CNC (self) = mgd;
+	g_return_val_if_fail (mgd != NULL, FALSE);
+
+	if (self->priv->id == 0) {
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
+					"Invalid value ID for workspace", NULL); 
+		return FALSE;
+	}
+
+	gchar *workspace_name = self->priv->name;
+	if (workspace_name == NULL 
+			|| (workspace_name != NULL && *workspace_name == '\0')) {
+		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
+					"Invalid (empty or null) workspace's name", NULL); 
+		return FALSE;
+	}
+
+	/* Check duplicate */
+	const MidgardWorkspaceContext *context = midgard_workspace_get_context (self);
+	if (context) {
+		MidgardWorkspace *ws_dup = (MidgardWorkspace *) midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), workspace_name);
+		g_object_unref (G_OBJECT (context));
+		if (ws_dup 
+				&& g_str_equal (ws_dup->priv->name, workspace_name)
+				&& ws_dup->priv->id != self->priv->id) {
+			g_object_unref (ws_dup);
+			g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS,
+					"Workspace with given '%s' name already exists in this context", workspace_name); 
+			return FALSE;
+		}
+
+		if (g_str_equal (ws_dup->priv->name, workspace_name)) {
+			g_object_unref (ws_dup);
+			return TRUE;
+		}		
+
+		if (ws_dup)
+			g_object_unref (ws_dup);
+	}
+
+	if (midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self))) {
+		midgard_core_workspace_list_all (mgd);
+		return TRUE;
+	}
+
+	g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "%s", midgard_connection_get_error_string (mgd));
+
 	return FALSE;
 }
 
@@ -280,8 +333,8 @@ _midgard_workspace_get_path (MidgardWorkspaceStorage *ws)
 	g_return_val_if_fail (ws != NULL, NULL);
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
-
-	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, NULL);
 
 	GSList *list = midgard_core_workspace_get_parent_names (mgd, self->priv->up_id);
