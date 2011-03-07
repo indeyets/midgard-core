@@ -213,9 +213,9 @@ _midgard_workspace_context_list_workspace_names (MidgardWorkspaceStorage *wss, g
 	}
 
 	/* Initialize NULL terminated array */
+	gchar **names = g_new (gchar *, j);
 	if (elements)
 		*elements = j;
-	gchar **names = g_new (gchar *, j+1);
 	i = 0;
 	j = 0;
 	while (tokens[i] != NULL) {
@@ -227,7 +227,6 @@ _midgard_workspace_context_list_workspace_names (MidgardWorkspaceStorage *wss, g
 		i++;
 	}
 	
-	names[j] = NULL;
 	g_free (tokens);
 
 	return names;
@@ -302,14 +301,11 @@ _midgard_workspace_context_list_children (MidgardWorkspaceStorage *wss, guint *n
 	if (n_objects) 
 		*n_objects = n_names;
 	MidgardWorkspace **children = g_new (MidgardWorkspace*, n_names);
-	while (names[i] != NULL) {
-		
+	for (i = 0; i < n_names; i++) {
 		children[i] = MIDGARD_WORKSPACE (midgard_workspace_storage_get_workspace_by_name (wss, names[i]));		
-		i++;
 	}
 
-	g_strfreev (names);
-	children[i] = NULL;
+	g_free (names);
 
 	return (MidgardWorkspaceStorage **) children;
 }
