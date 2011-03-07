@@ -258,7 +258,7 @@ midgard_test_workspace_context_list_children (MidgardWorkspaceContextTest *mwct,
 	guint n_objects;
 	MidgardWorkspaceStorage **children = midgard_workspace_storage_list_children (MIDGARD_WORKSPACE_STORAGE (workspace_context), &n_objects);
 	g_assert (children != NULL);
-	g_assert (n_objects == 4); /* Three workspaces from path + NULL */
+	g_assert_cmpint (n_objects, ==, 3); 
 
 	/* Stable */
 	gchar *name;
@@ -275,8 +275,6 @@ midgard_test_workspace_context_list_children (MidgardWorkspaceContextTest *mwct,
 	g_object_get (children[2], "name", &name, NULL);
 	g_assert_cmpstr (name, ==, MGD_TEST_WORKSPACE_NAME_PRIVATE);
 	g_free (name);
-
-	g_assert (children[3] == NULL);
 
 	g_object_unref (children[0]);
 	g_object_unref (children[1]);
