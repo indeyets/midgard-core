@@ -69,6 +69,29 @@ MidgardDBColumn *midgard_core_dbcolumn_new(void)
 	return mdc;
 }
 
+static void
+_update_gda_meta_store_table (GdaConnection *cnc, const gchar *tablename, GError **error)
+{
+	GdaMetaContext mcontext = {"_tables", 1, NULL, NULL};
+	mcontext.column_names = g_new (gchar *, 1);
+	mcontext.column_names[0] = "table_name";
+	mcontext.column_values = g_new (GValue *, 1);
+	g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), tablename);
+	
+	GError *err = NULL;
+	if (!gda_connection_update_meta_store (cnc, &mcontext, &err)) {
+		gda_value_free (mcontext.column_values[0]);
+		g_warning("Failed to update meta data for table '%s': %s", tablename, 
+				err && err->message ? err->message : "No detail");
+		g_propagate_error (error, err);
+		return;
+	}
+
+	gda_value_free (mcontext.column_values[0]);
+	g_free (mcontext.column_names);
+	g_free (mcontext.column_values);
+}
+
 gchar *midgard_core_query_where_guid(
 		const gchar *table, const gchar *guid)
 {
@@ -883,6 +906,8 @@ gboolean __table_exists(MidgardConnection *mgd, const gchar *tablename)
         g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), tablename);
 	GError *error = NULL;
 	
+	_update_gda_meta_store_table (mgd->priv->connection, tablename, NULL);
+
 	GdaDataModel *dm_schema =
 		gda_connection_get_meta_store_data (mgd->priv->connection,
 						    GDA_CONNECTION_META_TABLES, NULL, 1,
@@ -981,27 +1006,8 @@ midgard_core_query_create_table (MidgardConnection *mgd, const gchar *descr, con
 	g_clear_error(&error);
 
 	/* Update meta store */
-	GdaMetaStruct *mstruct;
-	GdaMetaDbObject *dbo;
-	GValue *table_value;
-	GdaMetaStore *store = gda_connection_get_meta_store (cnc);
 
-	if (!gda_connection_update_meta_store (cnc, NULL, &error)) {
-		    /* FIXME, error message */
-		    return FALSE;
-	}
-
-	mstruct = gda_meta_struct_new (store, GDA_META_STRUCT_FEATURE_NONE);
-	table_value = gda_value_new (G_TYPE_STRING);
-	g_value_set_string (table_value, tablename);
-	dbo = gda_meta_struct_complement (mstruct, GDA_META_DB_TABLE, NULL, NULL, table_value, &error);
-	gda_value_free (table_value);
-	g_object_unref (mstruct);
-
-	if (!dbo) {
-		g_warning ("Failed to update %s table meta store.", error && error->message ? error->message : "Unknown reason");
-		return FALSE;
-	}
+	_update_gda_meta_store_table (cnc, tablename, NULL); 
 
 	return TRUE;
 }
@@ -1017,18 +1023,6 @@ static gboolean __mcq_column_exists(MidgardConnection *mgd,
         g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), mdc->table_name);
         g_value_set_string ((mcontext.column_values[1] = gda_value_new (G_TYPE_STRING)), mdc->column_name);
 	GError *error = NULL;
-	/*if (!gda_connection_update_meta_store (mgd->priv->connection, &mcontext, &error)) {
-		gda_value_free (mcontext.column_values[0]);
-		//FIXME, there should be warning, but for some reason 
-		//either SQLite or gda-sqlite provider is buggy 
-		g_message ("Failed to update meta data for table '%s': %s", mdc->table_name, 
-				error && error->message ? error->message : "No detail");
-		if (error)
-			g_error_free(error);
-
-		return FALSE;
-	}*/
-
 	GdaDataModel *dm_schema =
 		gda_connection_get_meta_store_data (mgd->priv->connection,
 						    GDA_CONNECTION_META_FIELDS, NULL, 2,
@@ -1736,8 +1730,8 @@ gboolean midgard_core_query_update_class_storage(MidgardConnection *mgd, Midgard
 	return TRUE;
 }
 
-gboolean midgard_core_query_create_class_storage(
-		MidgardConnection *mgd, MidgardDBObjectClass *klass)
+gboolean 
+midgard_core_query_create_class_storage (MidgardConnection *mgd, MidgardDBObjectClass *klass)
 {
 	g_return_val_if_fail(mgd != NULL, FALSE);
 	g_return_val_if_fail(klass != NULL, FALSE);
@@ -1929,25 +1923,7 @@ gboolean midgard_core_query_create_class_storage(
 	g_free(pspecs);
 
 	/* Update GDA meta store */
-	GdaMetaContext mcontext = {"_tables", 1, NULL, NULL};
-        mcontext.column_names = g_new (gchar *, 1);
-        mcontext.column_names[0] = "table_name";
-        mcontext.column_values = g_new (GValue *, 1);
-        g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), tablename);
-	GError *error = NULL;
-	
-	if (!gda_connection_update_meta_store (mgd->priv->connection, &mcontext, &error)) {
-		gda_value_free (mcontext.column_values[0]);
-		g_warning("Failed to update meta data for table '%s': %s", tablename, 
-				error && error->message ? error->message : "No detail");
-		if (error)
-			g_error_free(error);
-		return FALSE;
-	}
-
-	gda_value_free (mcontext.column_values[0]);
-	g_free (mcontext.column_names);
-	g_free (mcontext.column_values);
+	_update_gda_meta_store_table (mgd->priv->connection, tablename, NULL);
 
 	mgd_info ("%s - Table create: OK", g_type_name(G_OBJECT_CLASS_TYPE(klass)));
 
