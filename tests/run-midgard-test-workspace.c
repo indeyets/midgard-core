@@ -59,8 +59,20 @@ int main (int argc, char *argv[])
 			midgard_test_workspace_new, midgard_test_workspace_teardown_foo);
 	g_test_add("/midgard_workspace/create", MidgardWorkspaceTest, mw, midgard_test_workspace_setup,  
 			midgard_test_workspace_create, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/update", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_update, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/purge", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_purge, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/exists", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_exists, midgard_test_workspace_teardown_foo);
 	g_test_add("/midgard_workspace/get_by_path", MidgardWorkspaceTest, mw, midgard_test_workspace_setup,  
 			midgard_test_workspace_get_by_path, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/get_path", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_get_path, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/list_workspace_names", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_list_workspace_names, midgard_test_workspace_teardown_foo);
+	g_test_add("/midgard_workspace_context/get_workspace_by_name", MidgardWorkspaceContextTest, mw, midgard_test_workspace_setup,
+			midgard_test_workspace_get_workspace_by_name, midgard_test_workspace_teardown_foo);
 	g_test_add("/midgard_workspace/list_children", MidgardWorkspaceTest, mw, midgard_test_workspace_setup,  
 			midgard_test_workspace_list_children, midgard_test_workspace_teardown_foo);
 	g_test_add("/midgard_workspace/get_context", MidgardWorkspaceTest, mw, midgard_test_workspace_setup,  

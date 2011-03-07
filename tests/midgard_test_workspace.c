@@ -68,6 +68,36 @@ midgard_test_workspace_create (MidgardWorkspaceTest *mwt, gconstpointer data)
 }
 
 void 
+midgard_test_workspace_update (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("update: %s \n", MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_exists (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("exists: %s \n", MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_purge (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("purge: %s \n", MISS_IMPL);
+}
+
+void 
 midgard_test_workspace_get_by_path (MidgardWorkspaceTest *mwt, gconstpointer data)
 {
 	MidgardConnection *mgd = mwt->mgd;
@@ -113,6 +143,36 @@ midgard_test_workspace_get_by_path (MidgardWorkspaceTest *mwt, gconstpointer dat
 }
 
 void 
+midgard_test_workspace_get_path (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("get_path: %s \n", MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_list_workspace_names (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("list_workspace_names: %s \n", MISS_IMPL);
+}
+
+void 
+midgard_test_workspace_get_workspace_by_name (MidgardWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+	g_assert (manager != NULL);
+
+	g_print ("get_workspace_by_name: %s \n", MISS_IMPL);
+}
+
+void 
 midgard_test_workspace_list_children (MidgardWorkspaceTest *mwt, gconstpointer data)
 {
 	MidgardConnection *mgd = mwt->mgd;
@@ -127,7 +187,7 @@ midgard_test_workspace_list_children (MidgardWorkspaceTest *mwt, gconstpointer d
 	g_assert (error == NULL);
 
 	//MidgardWorkspace **children = midgard_workspace_
-	g_warning (MISS_IMPL);
+	g_print ("list_children: %s \n", MISS_IMPL);
 
 	g_object_unref (workspace);
 }
