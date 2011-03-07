@@ -337,6 +337,9 @@ _midgard_workspace_get_path (MidgardWorkspaceStorage *ws)
 	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, NULL);
 
+	if (self->priv->path == NULL)
+		return NULL;
+
 	GSList *list = midgard_core_workspace_get_parent_names (mgd, self->priv->up_id);
 	GSList *l;
 	GString *str = g_string_new ("");
