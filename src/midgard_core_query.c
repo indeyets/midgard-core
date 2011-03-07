@@ -1220,7 +1220,6 @@ midgard_core_query_insert_records (MidgardConnection *mgd,
 
 gboolean __table_exists(MidgardConnection *mgd, const gchar *tablename)
 {
-#ifdef HAVE_LIBGDA_4
 	GdaMetaContext mcontext = {"_tables", 1, NULL, NULL};
         mcontext.column_names = g_new (gchar *, 1);
         mcontext.column_names[0] = "table_name";
@@ -1228,14 +1227,14 @@ gboolean __table_exists(MidgardConnection *mgd, const gchar *tablename)
         g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), tablename);
 	GError *error = NULL;
 	
-	if (!gda_connection_update_meta_store (mgd->priv->connection, &mcontext, &error)) {
+	/* if (!gda_connection_update_meta_store (mgd->priv->connection, &mcontext, &error)) {
 		gda_value_free (mcontext.column_values[0]);
 		g_warning("Failed to update meta data for table '%s': %s", tablename, 
 				error && error->message ? error->message : "No detail");
 		if (error)
 			g_error_free(error);
 		return TRUE;
-	}
+	} */
 
 	GdaDataModel *dm_schema =
 		gda_connection_get_meta_store_data (mgd->priv->connection,
@@ -1256,31 +1255,8 @@ gboolean __table_exists(MidgardConnection *mgd, const gchar *tablename)
 	if (gda_data_model_get_n_rows (dm_schema) == 0)
 		retval = FALSE;
 	g_object_unref (dm_schema);
-	return retval;
-#else	
-	GdaDataModel *dm_schema =
-		gda_connection_get_schema(mgd->priv->connection,
-				GDA_CONNECTION_SCHEMA_TABLES, NULL ,NULL);
-	if(!dm_schema) {
-		g_error("Failed to retrieve tables schema");
-		return TRUE;
-	}
 
-	gint rows = gda_data_model_get_n_rows(dm_schema);
-	guint j;
-	const GValue *value;
-	
-	for(j = 0; j < rows; j++) {
-		value = gda_data_model_get_value_at(dm_schema, 0, j);
-		if(g_str_equal(g_value_get_string(value), tablename)){
-			g_object_unref(dm_schema);
-			return TRUE;
-		}
-	}
-	
-	g_object_unref(dm_schema);
-#endif
-	return FALSE;
+	return retval;
 }
 
 gboolean midgard_core_table_exists(MidgardConnection *mgd, const gchar *tablename)
@@ -1362,8 +1338,6 @@ gboolean midgard_core_query_create_table(MidgardConnection *mgd,
 	g_object_unref(op);
 	g_clear_error(&error);
 
-#ifdef HAVE_LIBGDA_4
-
 	/* Update meta store */
 	GdaMetaStruct *mstruct;
 	GdaMetaDbObject *dbo;
@@ -1386,8 +1360,6 @@ gboolean midgard_core_query_create_table(MidgardConnection *mgd,
 		g_warning ("Failed to update %s table meta store.", error && error->message ? error->message : "Unknown reason");
 		return FALSE;
 	}
-
-#endif /* HAVE_LIBGDA_4 */
 
 	return TRUE;
 }
@@ -2414,6 +2386,27 @@ gboolean midgard_core_query_create_class_storage(
 
 	g_object_unref(mrp);
 	g_free(pspecs);
+
+	/* Update GDA meta store */
+	GdaMetaContext mcontext = {"_tables", 1, NULL, NULL};
+        mcontext.column_names = g_new (gchar *, 1);
+        mcontext.column_names[0] = "table_name";
+        mcontext.column_values = g_new (GValue *, 1);
+        g_value_set_string ((mcontext.column_values[0] = gda_value_new (G_TYPE_STRING)), tablename);
+	GError *error = NULL;
+	
+	if (!gda_connection_update_meta_store (mgd->priv->connection, &mcontext, &error)) {
+		gda_value_free (mcontext.column_values[0]);
+		g_warning("Failed to update meta data for table '%s': %s", tablename, 
+				error && error->message ? error->message : "No detail");
+		if (error)
+			g_error_free(error);
+		return FALSE;
+	}
+
+	gda_value_free (mcontext.column_values[0]);
+	g_free (mcontext.column_names);
+	g_free (mcontext.column_values);
 
 	mgd_info ("%s - Table create: OK", g_type_name(G_OBJECT_CLASS_TYPE(klass)));
 
