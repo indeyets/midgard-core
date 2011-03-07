@@ -63,7 +63,7 @@ midgard_test_workspace_create (MidgardWorkspaceTest *mwt, gconstpointer data)
 	workspace_created = midgard_workspace_manager_create (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
 	g_assert (workspace_created == FALSE);
 	g_assert (error != NULL);
-	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_PATH_EXISTS);
+	g_assert (error->code == MIDGARD_WORKSPACE_STORAGE_ERROR_NAME_EXISTS);
 	g_object_unref (workspace);
 }
 
@@ -84,10 +84,12 @@ midgard_test_workspace_get_by_path (MidgardWorkspaceTest *mwt, gconstpointer dat
 
 	workspace = midgard_workspace_new (mgd, NULL);
 	g_assert (workspace != NULL);
-	got_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), "/MyFirstWorkspace", &error);
+	gchar *ws_path = g_strdup_printf ("%s/%s", MGD_TEST_WORKSPACE_CONTEXT_PATH, MGD_TEST_WORKSPACE_NAME_LANCELOT);
+	got_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), ws_path, &error);
 	g_assert (got_by_path == TRUE);
 	g_assert (error == NULL);
 	g_object_unref (workspace);
+	g_free (ws_path);
 
 	/* FAIL */
 	/* Path doesn't exist */
