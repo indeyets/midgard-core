@@ -150,9 +150,11 @@ midgard_test_workspace_context_get_path (MidgardWorkspaceContextTest *mwct, gcon
 	MidgardWorkspaceContext *workspace_context = midgard_workspace_context_new ();
 	g_assert (workspace_context != NULL);
 
+	/* FAIL */
 	const gchar *workspace_context_path = midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (workspace_context));
 	g_assert (workspace_context_path == NULL);
 
+	/* SUCCESS */
 	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace_context), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
 	g_assert (get_by_path != FALSE);
 	g_assert (error == NULL);
