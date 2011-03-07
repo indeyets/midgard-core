@@ -333,11 +333,11 @@ _midgard_workspace_get_path (MidgardWorkspaceStorage *ws)
 	g_return_val_if_fail (ws != NULL, NULL);
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
-	MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	const MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
 	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, NULL);
 
-	if (self->priv->path == NULL)
+	if (self->priv->name == NULL)
 		return NULL;
 
 	GSList *list = midgard_core_workspace_get_parent_names (mgd, self->priv->up_id);
