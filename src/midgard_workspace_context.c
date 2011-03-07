@@ -344,7 +344,9 @@ static GSList*
 _midgard_workspace_context_iface_list_ids (MidgardWorkspaceStorage *self)
 {
 	MidgardWorkspaceContext *ctx = MIDGARD_WORKSPACE_CONTEXT (self);
-	return midgard_core_workspace_get_context_ids (ctx->priv->mgd, ctx->priv->workspace_id);
+	const MidgardWorkspaceManager *manager = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (self)->priv->manager;
+	MidgardConnection *mgd = manager->priv->mgd;
+	return midgard_core_workspace_get_context_ids (mgd, ctx->priv->workspace_id);
 }
 
 static guint
