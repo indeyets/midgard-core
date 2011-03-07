@@ -450,6 +450,7 @@ _midgard_workspace_context_instance_init (GTypeInstance *instance, gpointer g_cl
 	MidgardWorkspaceContext *self = MIDGARD_WORKSPACE_CONTEXT (instance);
 	self->priv = g_new (MidgardWorkspaceContextPrivate, 1);
 	self->priv->path = NULL;
+	self->priv->workspace_id = 0;
 }
 
 static GObject *
@@ -479,6 +480,8 @@ _midgard_workspace_context_finalize (GObject *object)
 
 	g_free (self->priv->path);
 	self->priv->path = NULL;
+
+	self->priv->workspace_id = 0;
 
 	g_free (self->priv);
 	self->priv = NULL;
