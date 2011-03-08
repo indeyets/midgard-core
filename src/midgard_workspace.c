@@ -333,6 +333,9 @@ _midgard_workspace_get_path (MidgardWorkspaceStorage *ws)
 
 	MidgardWorkspace *self = MIDGARD_WORKSPACE (ws);
 	const MidgardWorkspaceManager *manager = self->priv->manager;
+	if (!manager)
+		return NULL;
+
 	MidgardConnection *mgd = manager->priv->mgd;
 	g_return_val_if_fail (mgd != NULL, NULL);
 
