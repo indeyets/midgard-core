@@ -358,6 +358,81 @@ _midgard_workspace_get_path (MidgardWorkspaceStorage *ws)
 	return (const gchar *) self->priv->path;
 }
 
+static gchar **
+_midgard_workspace_list_workspace_names (MidgardWorkspaceStorage *wss, guint *elements)
+{
+	g_return_val_if_fail (wss != NULL, NULL);
+
+	if (elements)
+		*elements = 0;
+
+	MidgardWorkspace *self = MIDGARD_WORKSPACE (wss);
+	const gchar *path = midgard_workspace_storage_get_path (wss);
+	if (path == NULL)
+		return NULL;
+
+	gchar **tokens = g_strsplit (path, "/", 0);
+	guint i = 0;
+
+	GSList *slist = NULL;
+
+	/* compute number of elements, ignore empty element and self's name */       
+	while (tokens[i] != NULL) {
+		if (*tokens[i] != '\0' && !g_str_equal (self->priv->name, tokens[i]))
+			slist = g_slist_prepend (slist, tokens[i]);
+		i++;
+	}
+
+	if (slist == NULL)
+		return NULL;
+
+	gchar **names = g_new (gchar*, g_slist_length (slist));
+	slist = g_slist_reverse (slist);
+	GSList *l;
+	for (l = slist, i = 0; l != NULL; l = l->next, i++) {
+		names[i] = (gchar*) l->data;
+	}
+
+	if (elements)
+		*elements = g_slist_length (slist);
+	g_slist_free (slist);
+
+	return names;
+}
+
+static MidgardWorkspaceStorage*
+_midgard_workspace_get_workspace_by_name (MidgardWorkspaceStorage *wss, const gchar *name)
+{
+	g_return_val_if_fail (wss != NULL, NULL);
+	g_return_val_if_fail (name != NULL, NULL);
+
+	MidgardWorkspace *self = MIDGARD_WORKSPACE (wss);
+	const MidgardWorkspaceManager *manager = self->priv->manager;
+	gchar *path = self->priv->path;
+	
+	if (!path)
+		return NULL;
+
+	const MidgardWorkspaceContext *context = midgard_workspace_get_context (self);
+	if (!context)
+		return NULL;
+
+	return midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), name);	
+}
+
+static MidgardWorkspaceStorage ** 
+_midgard_workspace_list_children (MidgardWorkspaceStorage *wss, guint *n_objects) 
+{ 
+	g_return_val_if_fail (wss != NULL, NULL); 
+	if (n_objects) 
+		*n_objects = 0; 
+
+	guint n_names; 
+	gchar **names = midgard_workspace_storage_list_workspace_names (wss, &n_names); 
+	if (names == NULL) 
+		return NULL;
+}
+
 static GSList*
 _midgard_workspace_iface_list_ids (MidgardWorkspaceStorage *self)
 {
@@ -398,6 +473,9 @@ static void
 _midgard_workspace_iface_init (MidgardWorkspaceStorageIFace *iface)
 {
 	iface->get_path = _midgard_workspace_get_path;
+	iface->list_children = _midgard_workspace_list_children;
+	iface->list_workspace_names = _midgard_workspace_list_workspace_names;
+	iface->get_workspace_by_name = _midgard_workspace_get_workspace_by_name;
 
 	iface->priv = g_new (MidgardWorkspaceStorageIFacePrivate, 1);
         iface->priv->list_ids = _midgard_workspace_iface_list_ids;

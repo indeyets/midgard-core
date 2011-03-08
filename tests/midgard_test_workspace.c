@@ -201,7 +201,25 @@ midgard_test_workspace_list_workspace_names (MidgardWorkspaceTest *mwt, gconstpo
 	const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
 	g_assert (manager != NULL);
 
-	g_print ("list_workspace_names: %s \n", MISS_IMPL);
+	MidgardWorkspace *workspace = midgard_workspace_new ();
+	GError *error = NULL;
+	guint n_names;
+	gchar *ws_path = g_strdup_printf ("%s/%s", MGD_TEST_WORKSPACE_CONTEXT_PATH, MGD_TEST_WORKSPACE_NAME_LANCELOT);
+	gboolean got_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), ws_path, &error);
+	g_assert (got_by_path == TRUE);
+	g_assert (error == NULL);
+	
+	g_free (ws_path);
+
+	gchar **workspace_names = midgard_workspace_storage_list_workspace_names (MIDGARD_WORKSPACE_STORAGE (workspace), &n_names);
+	g_assert (workspace_names != NULL);
+	g_assert_cmpint (n_names, ==, 3);
+
+	g_assert_cmpstr (workspace_names[0], ==, MGD_TEST_WORKSPACE_NAME_STABLE);
+	g_assert_cmpstr (workspace_names[1], ==, MGD_TEST_WORKSPACE_NAME_TESTING);
+	g_assert_cmpstr (workspace_names[2], ==, MGD_TEST_WORKSPACE_NAME_PRIVATE);
+	g_object_unref (workspace);
+	g_free (workspace_names);
 }
 
 void 
