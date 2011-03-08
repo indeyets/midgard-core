@@ -250,16 +250,17 @@ midgard_test_workspace_get_context (MidgardWorkspaceTest *mwt, gconstpointer dat
 
 	const MidgardWorkspaceContext *ws_ctx = midgard_workspace_get_context (workspace);
 	g_assert (ws_ctx != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (ws_ctx));
 
 	MidgardWorkspaceContext *ctx = midgard_workspace_context_new ();
 	g_assert (ctx != NULL);
 	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (ctx), MGD_TEST_WORKSPACE_CONTEXT_PATH, NULL);
 	g_assert (get_by_path == TRUE);
+	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (ctx));
 
 	g_assert_cmpstr (midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (ws_ctx)), ==, midgard_workspace_storage_get_path (MIDGARD_WORKSPACE_STORAGE (ctx)));
 
-	g_object_unref (workspace);
-	g_object_unref (G_OBJECT (ws_ctx));
+	g_object_unref (workspace);	
 	g_object_unref (ctx);
 }
 
