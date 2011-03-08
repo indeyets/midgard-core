@@ -289,7 +289,6 @@ midgard_test_workspace_is_in_context (MidgardWorkspaceTest *mwt, gconstpointer d
 	g_assert (midgard_workspace_is_in_context (workspace, ws_ctx) == TRUE);
 	g_assert (midgard_workspace_is_in_context (workspace, ctx) == TRUE);
 
-	g_object_unref (workspace);
-	g_object_unref (ws_ctx);
+	g_object_unref (workspace);	
 	g_object_unref (ctx);
 }
