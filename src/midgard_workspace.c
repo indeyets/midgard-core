@@ -305,15 +305,14 @@ midgard_workspace_is_in_context (MidgardWorkspace *self, MidgardWorkspaceContext
 		i++;
 	}
 
+	g_free (names);
+
 	/* There's no named workspace */
-	if (!name) {
-		g_strfreev (names);
+	if (!name) 
 		return FALSE;
-	}
 
 	/* Get named workspace from context and check if id equals*/
 	MidgardWorkspace *tmp = (MidgardWorkspace *)midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), name);
-	g_strfreev (names);
 	if (!tmp)
 		return FALSE;
 
