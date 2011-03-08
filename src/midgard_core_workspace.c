@@ -23,6 +23,47 @@
 #include "midgard_core_object.h"
 #include "midgard_core_workspace.h"
 
+MidgardWorkspacePrivate *
+midgard_core_workspace_private_new () 
+{
+	MidgardWorkspacePrivate *priv = g_new (MidgardWorkspacePrivate, 1);
+	priv->parent_ws = NULL;
+	priv->path = NULL;
+	priv->name = NULL;
+	priv->id = 0;
+	priv->up_id = 0;
+	priv->manager = NULL;
+	priv->context = NULL;
+}
+
+void 
+midgard_core_workspace_private_free (MidgardWorkspacePrivate *ws_priv)
+{
+	g_return_if_fail (ws_priv != NULL);
+
+	if (ws_priv->parent_ws)
+		g_object_unref (ws_priv->parent_ws);
+	ws_priv->parent_ws = NULL;
+
+	g_free (ws_priv->path);
+	ws_priv->path = NULL;
+
+	g_free (ws_priv->name);
+	ws_priv->name = NULL;
+
+	ws_priv->id = 0;
+	ws_priv->up_id = 0;
+
+	ws_priv->manager = NULL;
+	
+	if (ws_priv->context)
+		g_object_unref ((gpointer)ws_priv->context);
+	ws_priv->context = NULL;
+
+	g_free (ws_priv);
+	ws_priv = NULL;
+}
+
 void
 midgard_core_workspace_list_all (MidgardConnection *mgd)
 {

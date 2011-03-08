@@ -34,7 +34,6 @@ G_BEGIN_DECLS
 #define MIDGARD_WORKSPACE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), MIDGARD_TYPE_WORKSPACE, MidgardWorkspaceClass))
 
 typedef struct _MidgardWorkspaceClass MidgardWorkspaceClass;
-typedef struct _MidgardWorkspacePrivate MidgardWorkspacePrivate; 
 
 struct _MidgardWorkspaceClass{
 	MidgardDBObjectClass parent;

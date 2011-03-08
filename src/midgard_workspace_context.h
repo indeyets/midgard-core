@@ -32,14 +32,13 @@ G_BEGIN_DECLS
 #define MIDGARD_IS_WORKSPACE_CONTEXT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), MIDGARD_WORKSPACE_CONTEXT_TYPE))
 #define MIDGARD_WORKSPACE_CONTEXT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), MIDGARD_WORKSPACE_CONTEXT_TYPE, MidgardWorkspaceContextClass))
 
-typedef struct _MidgardWorkspaceContextPrivate MidgardWorkspaceContextPrivate;
 typedef struct _MidgardWorkspaceContextClass MidgardWorkspaceContextClass;
 
 struct _MidgardWorkspaceContext {
 	GObject parent;
 
 	/* < private > */
-	MidgardWorkspaceContextPrivate *priv;
+	MidgardWorkspacePrivate *priv;
 };	
 
 struct _MidgardWorkspaceContextClass {

@@ -15,6 +15,7 @@ typedef struct _MidgardUser MidgardUser;
 typedef struct _MidgardMetadata MidgardMetadata;
 typedef struct _MidgardMetadataClass MidgardMetadataClass;
 typedef struct _MidgardWorkspace MidgardWorkspace;
+typedef struct _MidgardWorkspacePrivate MidgardWorkspacePrivate;
 typedef struct _MidgardWorkspaceContext MidgardWorkspaceContext;
 
 typedef enum {

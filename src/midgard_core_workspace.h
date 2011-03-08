@@ -47,16 +47,18 @@ struct _MidgardWorkspacePrivate {
 	gchar *name;
 	guint id;
 	guint up_id;
+	const MidgardWorkspaceManager *manager;
+	const MidgardWorkspaceContext *context;
 };
+
+MidgardWorkspacePrivate *midgard_core_workspace_private_new ();
+void 			midgard_core_workspace_private_free (MidgardWorkspacePrivate *ws_priv);
 
 struct _MidgardWorkspaceManagerPrivate {
 	        MidgardConnection *mgd;
 };
 
 struct _MidgardWorkspaceStorageIFacePrivate {
-	const MidgardWorkspaceManager *manager;
-	const MidgardWorkspaceContext *context;
-
 	GSList		*(*list_ids)	(MidgardWorkspaceStorage *self);
 	guint		(*get_id)	(MidgardWorkspaceStorage *self);
 	gboolean	(*create)	(const MidgardWorkspaceManager *manager, MidgardWorkspaceStorage *self, const gchar *path, GError **error);

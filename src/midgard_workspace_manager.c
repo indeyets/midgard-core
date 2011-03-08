@@ -22,13 +22,18 @@
 #include "midgard_workspace.h"
 #include "midgard_core_object.h"
 
+/* This is not nice. Can be done as iface's private virtual method. */
+#define __SET_MANAGER(__obj, __mngr) \
+	if (MIDGARD_IS_WORKSPACE (__obj)) MIDGARD_WORKSPACE (__obj)->priv->manager = __mngr; \
+	if (MIDGARD_IS_WORKSPACE_CONTEXT (__obj)) MIDGARD_WORKSPACE_CONTEXT (__obj)->priv->manager = __mngr; 
+
 /**
  * midgard_workspace_manager_new:
  * @mgd: #MidgardConnection instance
  *
  * Returns: new #MidgardWorkspaceManager object
  *
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 MidgardWorkspaceManager *
 midgard_workspace_manager_new (MidgardConnection *mgd) 
@@ -70,7 +75,7 @@ midgard_workspace_manager_new (MidgardConnection *mgd)
  * </itemizedlist>
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_workspace_manager_create (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
@@ -80,7 +85,7 @@ midgard_workspace_manager_create (const MidgardWorkspaceManager *self, MidgardWo
 
 	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->create (self, ws, path, error);
 	if (rv) {
-		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->manager = self;
+		__SET_MANAGER (ws, self);
 		midgard_core_workspace_list_all (self->priv->mgd);
 		/* TODO, emit signal */
 	}
@@ -111,7 +116,7 @@ midgard_workspace_manager_create (const MidgardWorkspaceManager *self, MidgardWo
  * </itemizedlist>
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_workspace_manager_update (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
@@ -146,7 +151,7 @@ midgard_workspace_manager_update (const MidgardWorkspaceManager *self, MidgardWo
  * </itemizedlist>
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_workspace_manager_purge (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, GError **error)
@@ -171,7 +176,7 @@ midgard_workspace_manager_purge (const MidgardWorkspaceManager *self, MidgardWor
  * Check if given @path exists. 
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_workspace_manager_path_exists (const MidgardWorkspaceManager *self, const gchar *path)
@@ -207,7 +212,7 @@ midgard_workspace_manager_path_exists (const MidgardWorkspaceManager *self, cons
  * </itemizedlist>
  *
  * Returns: %TRUE on success, %FALSE otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 gboolean
 midgard_workspace_manager_get_workspace_by_path (const MidgardWorkspaceManager *self, MidgardWorkspaceStorage *ws, const gchar *path, GError **error)
@@ -218,7 +223,7 @@ midgard_workspace_manager_get_workspace_by_path (const MidgardWorkspaceManager *
 	gboolean rv = MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->get_by_path (self, ws, path, error);
 
 	if (rv) {
-		MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE (ws)->priv->manager = self;
+		__SET_MANAGER (ws, self);
 	}
 	return rv;
 }
