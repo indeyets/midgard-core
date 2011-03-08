@@ -426,11 +426,6 @@ _midgard_workspace_instance_init (GTypeInstance *instance, gpointer g_class)
 {
 	MidgardWorkspace *self = (MidgardWorkspace *) instance;
 	self->priv = midgard_core_workspace_private_new ();
-	self->priv->parent_ws = NULL;
-	self->priv->path = NULL;
-	self->priv->name = NULL;
-	self->priv->id = 0;
-	self->priv->up_id = 0;
 
 	return;
 }
