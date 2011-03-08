@@ -198,8 +198,7 @@ _midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorksp
 	/* Check duplicate */
 	const MidgardWorkspaceContext *context = midgard_workspace_get_context (self);
 	if (context) {
-		MidgardWorkspace *ws_dup = (MidgardWorkspace *) midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), workspace_name);
-		g_object_unref (G_OBJECT (context));
+		MidgardWorkspace *ws_dup = (MidgardWorkspace *) midgard_workspace_storage_get_workspace_by_name (MIDGARD_WORKSPACE_STORAGE (context), workspace_name);	
 		if (ws_dup 
 				&& g_str_equal (ws_dup->priv->name, workspace_name)
 				&& ws_dup->priv->id != self->priv->id) {
