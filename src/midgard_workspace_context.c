@@ -27,6 +27,7 @@
  * midgard_workspace_context_new:
  *
  * Returns: #MidgardWorkspaceContext instance
+ * Since: 10.05.5
  */
 MidgardWorkspaceContext *
 midgard_workspace_context_new ()
@@ -301,6 +302,16 @@ _midgard_workspace_context_list_children (MidgardWorkspaceStorage *wss, guint *n
 	return (MidgardWorkspaceStorage **) children;
 }
 
+/**
+ * midgard_workspace_context_has_workspace:
+ * @self: #MidgardWorkspaceContext instance
+ * @workspace: #MidgardWorkspace to check
+ *
+ * Check, whether given @workspace is in given context
+ *
+ * Returns: %TRUE on success, %FALSE otherwise
+ * Since: 10.05.5
+ */ 
 gboolean
 midgard_workspace_context_has_workspace (MidgardWorkspaceContext *self, MidgardWorkspace *workspace)
 {

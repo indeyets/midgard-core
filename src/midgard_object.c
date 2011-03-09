@@ -3274,8 +3274,8 @@ gboolean midgard_object_has_dependents(MidgardObject *self)
  * This function is slower than midgard_object_class_get_object_by_path, 
  * as it has to create new object instance and copy all properties.
  * 
- * #MidgardError is set by midgard_object_class_get_object_by_path in this case.
- * Read about midgard_object_class_get_object_by_path() for more details.
+ * #MidgardErrorGeneric is set by midgard_schema_object_factory_get_object_by_path in this case.
+ * Read about midgard_schema_object_factory_get_object_by_path() for more details.
  * 
  * Returns: %TRUE if object is found, %FALSE otherwise.
  */ 
@@ -3956,12 +3956,12 @@ gboolean midgard_object_unlock(MidgardObject *self)
 }
 
 /**
- * midgard_object_get_context:
+ * midgard_object_get_workspace:
  * @self: #MidgardObject instance
  *
  * Returns: new #MidgardWorkspace object or %NULL
  * 
- * Since: 10.05.4
+ * Since: 10.05.5
  */
 MidgardWorkspace*
 midgard_object_get_workspace (MidgardObject *self)

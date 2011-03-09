@@ -27,12 +27,12 @@ midgard_workspace_storage_error_quark (void)
 
 /**
  * midgard_workspace_storage_get_path:
- * @self: #MidgardWorspaceStorage instance
+ * @self: #MidgardWorkspaceStorage instance
  *
  * Returned path may be %NULL, if given object doesn't exists in storage
  *
  * Returns: (transfer none): a path, given #MidgardWorkspaceStorage is at.
- * Since: 10.05.4
+ * Since: 10.05.5
  */
 const gchar *
 midgard_workspace_storage_get_path (MidgardWorkspaceStorage *self)
@@ -48,7 +48,7 @@ midgard_workspace_storage_get_path (MidgardWorkspaceStorage *self)
  * @name: a name of #MidgardWorkspaceStorage object to find
  *
  * Returns: newly allocated #MidgardWorkspaceStorage object if found, %NULL otherwise
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 MidgardWorkspaceStorage *
 midgard_workspace_storage_get_workspace_by_name (MidgardWorkspaceStorage *self, const gchar *name)
@@ -67,7 +67,7 @@ midgard_workspace_storage_get_workspace_by_name (MidgardWorkspaceStorage *self, 
  * returned. 
  *
  * Returns: (array length=n_objects): newly allocated array of #MidgardWorkspaceStorage objects
- * Since: 10.05.4
+ * Since: 10.05.5
  */ 
 MidgardWorkspaceStorage **
 midgard_workspace_storage_list_children (MidgardWorkspaceStorage *self, guint *n_objects)
@@ -82,8 +82,8 @@ midgard_workspace_storage_list_children (MidgardWorkspaceStorage *self, guint *n
  * @self: #MidgardWorkspaceStorage instance
  * @n_names: a pointer to store number of returned names
  * 
- * Returns: (transfer: container) (array length=n_names): array of names
- * Since: 10.05.4
+ * Returns: (transfer container) (array length=n_names): array of names
+ * Since: 10.05.5
  */ 
 gchar **
 midgard_workspace_storage_list_workspace_names (MidgardWorkspaceStorage *self, guint *n_names)

@@ -104,6 +104,7 @@ midgard_object_is_locked
 midgard_object_approve
 midgard_object_unapprove
 midgard_object_is_approved
+midgard_object_get_workspace
 <SUBSECTION Standard>
 MIDGARD_OBJECT
 MIDGARD_IS_OBJECT
@@ -437,8 +438,8 @@ midgard_quota_size_is_reached
 <SECTION>
 <INCLUDE>midgard/midgard.h</INCLUDE>
 <FILE>midgard_error</FILE>
-MGD_GENERIC_ERROR
-MgdErrorGeneric
+MIDGARD_GENERIC_ERROR
+MidgardErrorGeneric
 midgard_error_generic
 midgard_error_string
 midgard_set_error
@@ -767,8 +768,8 @@ MIDGARD_SCHEMA_OBJECT_TREE_GET_CLASS
 MidgardWorkspaceStorage
 midgard_workspace_storage_get_path
 midgard_workspace_storage_get_workspace_by_name
-midgard_workspace_list_children
-midgard_workspace_list_workspace_names
+midgard_workspace_storage_list_children
+midgard_workspace_storage_list_workspace_names
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE_STORAGE
 MIDGARD_IS_WORKSPACE_STORAGE
@@ -823,8 +824,8 @@ midgard_workspace_manager_new
 midgard_workspace_manager_get_workspace_by_path
 midgard_workspace_manager_create
 midgard_workspace_manager_update
-midgard_workspace_manager_exists
-midgard_workspace_manager_delete
+midgard_workspace_manager_path_exists
+midgard_workspace_manager_purge
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE_MANAGER
 MIDGARD_IS_WORKSPACE_MANAGER

@@ -1031,7 +1031,7 @@ static void __set_from_sql(MidgardDBObject *object,
  * Associates given #MidgardObject person with @self #MidgardUser.
  * Sets person property and updates user storage record.
  *
- * #MidgardUser @self takes ownership of the given #MidgardPerson reference, 
+ * #MidgardUser @self takes ownership of the given #MidgardObject ('midgard_person' type) reference, 
  * and increases person's object reference count. 
  * 
  * See midgard_user_update() for returned error details.

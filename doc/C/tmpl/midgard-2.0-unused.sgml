@@ -122,6 +122,12 @@ midgard_sitegroup
 midgard_tree
 
 
+<!-- ##### MACRO MGD_GENERIC_ERROR ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### MACRO MGD_TYPE_SITEGROUP ##### -->
 <para>
 

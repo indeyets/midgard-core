@@ -126,7 +126,7 @@ midgard_storage_create_base_storage(MidgardConnection *mgd)
 /**
  * midgard_storage_create:
  * @mgd: #MidgardConnection instance
- * @name: name of #MidgardDBObjectClass derived class
+ * @name: name of #MidgardDBObject derived class
  * 
  * Creates underlying storage (e.g. table in database) for class which is identified by given @name.
  * It may be class which represents any underlying storage type (database table or view, for example).

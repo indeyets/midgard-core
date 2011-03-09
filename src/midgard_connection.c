@@ -640,7 +640,7 @@ __midgard_connection_open(MidgardConnection *mgd, gboolean init_schema, GError *
  * error state.
  *
  * It also initializes #MidgardSchema object (which is encapsulated by implementation )
- * and register all MgdSchema, #MidgardObjectClass derived classes defined by user.
+ * and register all MgdSchema, #MidgardObject derived classes defined by user.
  * This happens only when basic Midgard classes are not registered in GType system.
  * This is recommended way to initialize MgdSchema types.
  *  
@@ -1041,7 +1041,7 @@ gint midgard_connection_get_error(MidgardConnection *self)
  * @self: #MidgardConnection instance
  * @errcode: error code
  *
- * Valid #errcode is one defined in #MgdErrorGeneric.
+ * Valid @errcode is one defined in #MidgardErrorGeneric.
  */
 void midgard_connection_set_error(MidgardConnection *self, gint errcode)
 {
@@ -1431,7 +1431,7 @@ midgard_connection_set_workspace (MidgardConnection *self, MidgardWorkspaceStora
  * midgard_connection_get_workspace:
  * @self: #MidgardConnection instance
  *
- * Returns: (tranfer none): #MidgardWorkspaceStorage associated with #MidgardConnection or %NULL
+ * Returns: (transfer none): #MidgardWorkspaceStorage associated with #MidgardConnection or %NULL
  * Since: 10.05.5
  */
 const MidgardWorkspaceStorage*
