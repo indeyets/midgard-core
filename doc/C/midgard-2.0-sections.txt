@@ -766,7 +766,9 @@ MIDGARD_SCHEMA_OBJECT_TREE_GET_CLASS
 <TITLE>MidgardWorkspaceStorage</TITLE>
 MidgardWorkspaceStorage
 midgard_workspace_storage_get_path
-midgard_workspace_storage_get_by_path
+midgard_workspace_storage_get_workspace_by_name
+midgard_workspace_list_children
+midgard_workspace_list_workspace_names
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE_STORAGE
 MIDGARD_IS_WORKSPACE_STORAGE
@@ -781,10 +783,8 @@ MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE
 <TITLE>MidgardWorkspaceContext</TITLE>
 MidgardWorkspaceContext
 MidgardWorkspaceContextClass
-midgard_workspace_context_exists
-midgard_workspace_context_create
-midgard_workspace_context_list_workspace_names
-midgard_workspace_context_get_workspace_by_name
+midgard_workspace_context_new
+midgard_workspace_context_has_workspace
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE_CONTEXT
 MIDGARD_IS_WORKSPACE_CONTEXT
@@ -802,10 +802,7 @@ MIDGARD_WORKSPACE_CONTEXT_GET_CLASS
 MidgardWorkspace
 MidgardWorkspaceClass
 midgard_workspace_new
-midgard_workspace_update
-midgard_workspace_list_children
 midgard_workspace_get_context
-midgard_workspace_is_in_context
 <SUBSECTION Standard>
 MIDGARD_WORKSPACE
 MIDGARD_IS_WORKSPACE
@@ -814,5 +811,27 @@ midgard_workspace_get_type
 MIDGARD_WORKSPACE_CLASS
 MIDGARD_IS_WORKSPACE_CLASS
 MIDGARD_WORKSPACE_GET_CLASS
+</SECTION>
+
+<SECTION>
+<INCLUDE>midgard/midgard.h</INCLUDE>
+<FILE>midgard_workspace_manager</FILE>
+<TITLE>MidgardWorkspaceManager</TITLE>
+MidgardWorkspaceManager
+MidgardWorkspaceManagerClass
+midgard_workspace_manager_new
+midgard_workspace_manager_get_workspace_by_path
+midgard_workspace_manager_create
+midgard_workspace_manager_update
+midgard_workspace_manager_exists
+midgard_workspace_manager_delete
+<SUBSECTION Standard>
+MIDGARD_WORKSPACE_MANAGER
+MIDGARD_IS_WORKSPACE_MANAGER
+MIDGARD_TYPE_WORKSPACE_MANAGER
+midgard_workspace_manager_get_type
+MIDGARD_WORKSPACE_MANAGER_CLASS
+MIDGARD_IS_WORKSPACE_MANAGER_CLASS
+MIDGARD_WORKSPACE_MANAGER_GET_CLASS
 </SECTION>
 
