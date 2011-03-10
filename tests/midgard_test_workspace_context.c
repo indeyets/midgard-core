@@ -324,7 +324,7 @@ midgard_test_workspace_context_has_workspace (MidgardWorkspaceContextTest *mwct,
 	g_object_unref (workspace);
 
 	/* FAIL */
-	MidgardWorkspace ws = midgard_workspace_new (); 
+	MidgardWorkspace *ws = midgard_workspace_new (); 
 	g_assert (ws != NULL);
 	g_assert (midgard_workspace_context_has_workspace (workspace_context, ws) == FALSE);
 	g_object_unref (ws);
