@@ -16,6 +16,7 @@
 #include "midgard_test_storage.h"
 #include "midgard_test_workspace_context.h"
 #include "midgard_test_workspace.h"
+#include "midgard_test_object_workspace.h"
 
 #define MISS_IMPL "MISSING IMPLEMENTATION "
 #define MGD_TEST_SITEGROUP_NAME "midgard_test_sitegroup"
