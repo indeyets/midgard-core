@@ -286,8 +286,7 @@ midgard_test_workspace_context_list_children (MidgardWorkspaceContextTest *mwct,
 	/* FAIL */
 
 	workspace_context = midgard_workspace_context_new ();
-	g_assert (workspace_context != NULL);
-	n_objects;
+	g_assert (workspace_context != NULL);	
 	children = midgard_workspace_storage_list_children (MIDGARD_WORKSPACE_STORAGE (workspace_context), &n_objects);
 	g_assert (children == NULL);
 	g_assert (n_objects == 0); 
@@ -325,10 +324,10 @@ midgard_test_workspace_context_has_workspace (MidgardWorkspaceContextTest *mwct,
 	g_object_unref (workspace);
 
 	/* FAIL */
-	workspace = midgard_workspace_new (); 
-	g_assert (workspace != NULL);
-	g_assert (midgard_workspace_context_has_workspace (workspace_context, workspace) == FALSE);
-	g_object_unref (workspace);
+	MidgardWorkspace ws = midgard_workspace_new (); 
+	g_assert (ws != NULL);
+	g_assert (midgard_workspace_context_has_workspace (workspace_context, ws) == FALSE);
+	g_object_unref (ws);
 
 	g_object_unref (workspace_context);
 }
