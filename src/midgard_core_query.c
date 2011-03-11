@@ -120,6 +120,9 @@ midgard_core_query_execute (MidgardConnection *mgd, const gchar *query, gboolean
 			mgd->priv->parser = gda_sql_parser_new ();
 	}
 
+	if (MGD_CNC_DEBUG (mgd))
+		g_debug("query = %s", query);
+
 	/* create a new statement */
 	stmt = gda_sql_parser_parse_string (mgd->priv->parser, query, NULL, &lerror);
 	if (stmt) {
@@ -127,8 +130,6 @@ midgard_core_query_execute (MidgardConnection *mgd, const gchar *query, gboolean
 								      NULL, NULL, &lerror);
 		g_object_unref (stmt);
 	}
-
-	g_debug("query = %s", query);
 
 	if(!ignore_error){
 		
