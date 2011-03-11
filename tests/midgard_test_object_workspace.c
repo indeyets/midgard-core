@@ -29,16 +29,19 @@ midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpoi
 
 	MidgardWorkspace *workspace = midgard_workspace_new ();
 	GError *error = NULL;
-	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, workspace, MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
 	g_assert (get_by_path == TRUE);
 
-	midgard_connection_set_workspace (mgd, workspace);
-	midgard_connection_enable_workspace (mgd);
+	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
+	midgard_connection_enable_workspace (mgd, TRUE);
 	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
+
+	gboolean storage_updated = midgard_storage_update (mgd, _OBJECT_CLASS);
 
 	MidgardObject *person = midgard_object_new (mgd, _OBJECT_CLASS, NULL);
 	g_object_set (person, "firstname", "Sir Lancelot", NULL);
 	gboolean object_created = midgard_object_create (person);
+	MIDGARD_TEST_ERROR_OK(mgd);
 	g_assert (object_created == TRUE);
 
 	MidgardWorkspace *object_workspace = midgard_object_get_workspace (person);
