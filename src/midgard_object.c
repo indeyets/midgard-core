@@ -862,6 +862,7 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	GString *query;
 	const gchar *tablename;
 	MidgardConnection *mgd = MGD_OBJECT_CNC (object);	
+	GError *err = NULL;
 
 	if (MIDGARD_DBOBJECT (object)->dbpriv->storage_data == NULL)
 		return FALSE;
@@ -934,12 +935,28 @@ gboolean _midgard_object_create (	MidgardObject *object,
 		return FALSE;
 	}	
 
-     	/* Set workspace context */
-	GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_insert_params;
-	/* Workspace id */
-	gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
-	/* Workspace object id */
-	gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_OID_FIELD, MGD_OBJECT_WS_OID (object));
+	if (MGD_CNC_USES_WORKSPACE (mgd)) {
+		/* Set workspace context */
+		GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_insert_params;
+		/* Workspace id */
+		gda_set_set_holder_value (params, &err, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
+		if (err) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, 
+					"Failed to set workspace id parameter: %s.", 
+					err && err->message ? err->message : "Unknown reason");
+			g_clear_error (&err);
+			return FALSE;
+		}
+		/* Workspace object id */
+		gda_set_set_holder_value (params, &err, MGD_WORKSPACE_OID_FIELD, MGD_OBJECT_WS_OID (object));
+		if (err) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, 
+					"Failed to set object's workspace id parameter: %s.", 
+					err && err->message ? err->message : "Unknown reason");
+			g_clear_error (&err);
+			return FALSE;
+		}
+	}
 
 	gint inserted = midgard_core_query_create_dbobject_record (MIDGARD_DBOBJECT (object));
 
