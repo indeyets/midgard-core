@@ -369,6 +369,15 @@ __initialize_statement_insert (MidgardDBObjectClass *klass)
 }
 
 static void
+__initialize_workspace_statement_insert (MidgardDBObjectClass *klass)
+{
+	gchar *query = __initialize_statement_insert_query_string (klass);
+	/* TODO, add workspace fields */
+	__initialize_statement_insert_query_parameters (klass, query);
+	g_free (query);
+}
+
+static void
 __statement_update_add_metadata_fields (MidgardDBObjectClass *klass, GString *sql)
 {
 	MidgardMetadataClass *mklass = MGD_DBCLASS_METADATA_CLASS (klass);
