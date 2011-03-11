@@ -224,6 +224,7 @@ struct _MidgardConnectionPrivate {
 #define MGD_CNC_REPLICATION(_cnc) _cnc->priv->enable_replication
 #define	MGD_CNC_DEBUG(_cnc) _cnc->priv->enable_debug
 #define MGD_CNC_DBUS(_cnc) _cnc->priv->enable_dbus
+#define MGD_CNC_USES_WORKSPACE(_cnc) _cnc->priv->enable_workspace
 #define MGD_CNC_HAS_WORKSPACE(_cnc) _cnc->priv->has_workspace
 #define MGD_CNC_WORKSPACE(_cnc) (MidgardWorkspace *)_cnc->priv->workspace
 #define MGD_CNC_WORKSPACE_ID(_cnc) MIDGARD_WORKSPACE_STORAGE_GET_INTERFACE(MGD_CNC_WORKSPACE(_cnc))->priv->get_id(MIDGARD_WORKSPACE_STORAGE (MGD_CNC_WORKSPACE(_cnc)))
