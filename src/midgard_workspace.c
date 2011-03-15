@@ -458,7 +458,8 @@ static GSList*
 _midgard_workspace_iface_list_ids (MidgardWorkspaceStorage *self)
 {
 	MidgardWorkspace *ws = MIDGARD_WORKSPACE (self);
-	MidgardConnection *mgd = MGD_OBJECT_CNC (ws);
+	const MidgardWorkspaceManager *manager = ws->priv->manager;
+	MidgardConnection *mgd = manager->priv->mgd;
 	guint id = ws->priv->id;
 	if (id == 0)
 		return NULL;
