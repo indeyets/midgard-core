@@ -327,7 +327,6 @@ __add_implicit_workspace_join (MidgardQuerySelect *self, GdaSqlOperation *operat
 
 gboolean __query_select_add_joins (MidgardQuerySelect *self, GdaSqlOperation *operation, GError **error)
 {
-#warning "Add workspace condition" 
 	__add_implicit_workspace_join (self, operation);
 
 	if (!MIDGARD_QUERY_EXECUTOR (self)->priv->joins)
