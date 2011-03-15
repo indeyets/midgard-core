@@ -1514,7 +1514,7 @@ static void _midgard_user_class_init(
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->storage_exists = _user_storage_exists; 
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->delete_storage = _user_storage_delete;
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_static_sql_select = NULL;
-	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_statement_insert = MIDGARD_DBOBJECT_CLASS (__parent_class)->dbpriv->set_statement_insert;
+	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->get_statement_insert = MIDGARD_DBOBJECT_CLASS (__parent_class)->dbpriv->get_statement_insert;
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_statement_update = MIDGARD_DBOBJECT_CLASS (__parent_class)->dbpriv->set_statement_update;
 
 	type_attr->params = midgard_core_dbobject_class_list_properties (MIDGARD_DBOBJECT_CLASS (klass), &type_attr->num_properties);	
@@ -1532,7 +1532,6 @@ static void _midgard_user_class_init(
 	g_string_free (sql_full, TRUE);
 
 	 /* Initialize persistent statements */
-	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_statement_insert (MIDGARD_DBOBJECT_CLASS (klass));
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_statement_update (MIDGARD_DBOBJECT_CLASS (klass));
 }
 

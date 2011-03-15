@@ -1532,83 +1532,6 @@ __statement_insert_add_metadata_fields (MidgardDBObjectClass *klass, GString *co
 }
 
 static void
-__initialize_statement_insert (MidgardDBObjectClass *klass)
-{
-	GString *sql = g_string_new ("INSERT INTO ");
-	guint n_props;
-	guint i;
-	const gchar *table = MGD_DBCLASS_TABLENAME (klass);
-	g_return_if_fail (table != NULL);
-
-	g_string_append (sql, table); 
-
-	GParamSpec **pspecs = midgard_core_dbobject_class_list_properties (klass, &n_props);
-	g_return_if_fail (pspecs != NULL);
-
-	GString *colnames = g_string_new ("");
-	GString *values = g_string_new ("");
-	const gchar *pk = MGD_DBCLASS_PRIMARY (klass);
-	gboolean add_coma = FALSE;
-
-	for (i = 0; i < n_props; i++) {
-		/* Ignore primary key */
-		if (pk && g_str_equal (pspecs[i]->name, pk))
-			continue;
-
-		const gchar *col_name = midgard_core_class_get_property_colname (klass, pspecs[i]->name);
-		if (add_coma) {
-			g_string_append (colnames, ", ");
-			g_string_append (values, ", ");
-		}
-
-		g_string_append (colnames, col_name);
-
-		const gchar *type_name = g_type_name (pspecs[i]->value_type);
-		if (pspecs[i]->value_type == MIDGARD_TYPE_TIMESTAMP)
-			type_name = "string";
-		g_string_append_printf (values, "##%s::%s", col_name, type_name);
-
-		add_coma = TRUE;
-	}
-
-	__statement_insert_add_metadata_fields (klass, colnames, values);
-
-	/* Add workspace context columns */
-	g_string_append_printf (colnames, ", %s, %s", MGD_WORKSPACE_OID_FIELD, MGD_WORKSPACE_ID_FIELD);
-	g_string_append_printf (values, ", ##%s::guint", MGD_WORKSPACE_OID_FIELD);
-	g_string_append_printf (values, ", ##%s::guint", MGD_WORKSPACE_ID_FIELD);
-
-	g_string_append_printf (sql, " (%s) VALUES (%s)", colnames->str, values->str);		
-
-	GdaSqlParser *parser = gda_sql_parser_new ();
-	GdaStatement *stmt;
-	GError *error = NULL;
-	stmt = gda_sql_parser_parse_string (parser, sql->str, NULL, &error);
-
-	g_string_free (sql, TRUE);
-	g_string_free (colnames, TRUE);
-	g_string_free (values, TRUE);
-
-	if (!stmt) {
-
-		g_error ("Couldn't create %s class prepared statement. %s", 
-				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
-		return;
-	}
-
-	GdaSet *params; 
-	if (!gda_statement_get_parameters (stmt, &params, &error)) {
-		g_error ("Failed to create GdaSet for %s class. %s", 
-				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
-	}
-	
-	klass->dbpriv->statement_insert = stmt;
-	klass->dbpriv->statement_insert_params = params;
-	
-	return;
-}
-
-static void
 __statement_update_add_metadata_fields (MidgardDBObjectClass *klass, GString *sql)
 {
 	MidgardMetadataClass *mklass = MGD_DBCLASS_METADATA_CLASS (klass);
@@ -1757,7 +1680,7 @@ __mgdschema_class_init(gpointer g_class, gpointer class_data)
 		dbklass->dbpriv->add_fields_to_select_statement = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement;
 		dbklass->dbpriv->get_property = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->get_property;
 		dbklass->dbpriv->set_from_data_model = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model;
-		dbklass->dbpriv->set_statement_insert = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_statement_insert;
+		dbklass->dbpriv->get_statement_insert = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->get_statement_insert;
 		dbklass->dbpriv->set_statement_update = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_statement_update;
 		dbklass->dbpriv->set_static_sql_select = _mgdschema_class_set_static_sql_select;
 	}	
@@ -1795,10 +1718,6 @@ __mgdschema_class_init(gpointer g_class, gpointer class_data)
 	/* Reset params spec */
 	g_free (data->params);
 	data->params = NULL;
-
-	/* Initialize persistent statements */
-	dbklass->dbpriv->set_statement_insert (dbklass);
-	dbklass->dbpriv->set_statement_update (dbklass);
 }
 
 static void
@@ -2003,7 +1922,7 @@ __midgard_object_class_init (MidgardObjectClass *klass, gpointer g_class_data)
 	dbklass->dbpriv->add_fields_to_select_statement = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->add_fields_to_select_statement;
 	dbklass->dbpriv->get_property = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->get_property;
 	dbklass->dbpriv->set_from_data_model = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->set_from_data_model;
-	dbklass->dbpriv->set_statement_insert = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->set_statement_insert;
+	dbklass->dbpriv->get_statement_insert = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->get_statement_insert;
 	dbklass->dbpriv->set_statement_update = MIDGARD_DBOBJECT_CLASS (__midgard_object_parent_class)->dbpriv->set_statement_update;
 	dbklass->dbpriv->set_static_sql_select = NULL;
 

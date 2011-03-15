@@ -21,6 +21,7 @@
 #include "midgard_core_object.h"
 #include "midgard_core_object_class.h"
 #include <sql-parser/gda-sql-parser.h>
+#include "midgard_core_workspace.h"
 
 static GObjectClass *parent_class= NULL;
 
@@ -304,14 +305,15 @@ __initialize_statement_insert_query_parameters (MidgardDBObjectClass *klass, con
 				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
 	}
 	
-	klass->dbpriv->_statement_insert = stmt;
-	klass->dbpriv->_statement_insert_params = params;
-
 	if (add_workspace) {
 		klass->dbpriv->_workspace_statement_insert = stmt;
 		klass->dbpriv->_workspace_statement_insert_params = params;
+		return;
 	}
 	
+	klass->dbpriv->_statement_insert = stmt;
+	klass->dbpriv->_statement_insert_params = params;
+
 	return;
 }
 
@@ -382,16 +384,16 @@ __get_statement_insert (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 		
 		if (!klass->dbpriv->_workspace_statement_insert) {
 			query = __initialize_statement_insert_query_string (klass, TRUE);
-			__initialize_statement_insert_query_parameters (klass, query);
-			g_string_free (query);
+			__initialize_statement_insert_query_parameters (klass, query, TRUE);
+			g_free (query);
 		}
 
-		return klass->dbpriv->_workspave_statement_insert;
+		return klass->dbpriv->_workspace_statement_insert;
 	}
 
 	if (klass->dbpriv->_statement_insert != NULL) {
 		query = __initialize_statement_insert_query_string (klass, FALSE);
-		__initialize_statement_insert_query_parameters (klass, query);
+		__initialize_statement_insert_query_parameters (klass, query, FALSE);
 		g_free (query);
 	}
 

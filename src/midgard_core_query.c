@@ -588,9 +588,9 @@ midgard_core_query_create_dbobject_record (MidgardDBObject *object)
 		return FALSE;
 	}
 
-	GdaStatement *insert = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_insert;
+	GdaStatement *insert = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->get_statement_insert (klass, mgd);
 	g_return_val_if_fail (insert != NULL, FALSE);
-	GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_insert_params;
+	GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->get_statement_insert_params (klass, mgd);
 
 	guint n_props;
 	guint i;	
