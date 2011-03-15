@@ -971,7 +971,8 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	/* See: http://mail.gnome.org/archives/gnome-db-list/2007-April/msg00020.html */
 	query = g_string_new("");
 	g_string_append_printf(query, "guid = '%s' ", MGD_OBJECT_GUID (object));
-	
+
+#warning "Use workspace id constraint when getting object's id"	
 	GValue *idval =
 		midgard_core_query_get_field_value(
 				mgd, "id", tablename,
