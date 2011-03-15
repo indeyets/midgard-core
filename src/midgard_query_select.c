@@ -281,8 +281,10 @@ __add_implicit_workspace_join (MidgardQuerySelect *self, GdaSqlOperation *operat
 	join->position = ++executor->priv->joinid;
 
 	GString *table = g_string_new ("(SELECT DISTINCT MAX");
-	g_string_append_printf (table, "(%s) AS %s, %s FROM %s WHERE %s IN (", 
+	g_string_append_printf (table, "(%s) AS %s, %s %s%s FROM %s WHERE %s IN (", 
 			MGD_WORKSPACE_ID_FIELD, MGD_WORKSPACE_ID_FIELD, MGD_WORKSPACE_OID_FIELD, 
+			MGD_DBCLASS_METADATA_CLASS (klass) ? "," : "",
+			MGD_DBCLASS_METADATA_CLASS (klass) ? "metadata_deleted" : "",
 			klass_table, MGD_WORKSPACE_ID_FIELD);
 
 	const MidgardWorkspaceStorage *ws = midgard_connection_get_workspace (mgd);
