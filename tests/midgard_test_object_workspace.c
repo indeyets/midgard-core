@@ -39,6 +39,7 @@ midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpoi
 	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
 
 	gboolean storage_updated = midgard_storage_update (mgd, _OBJECT_CLASS);
+	g_assert (storage_updated == TRUE);
 
 	MidgardObject *person = midgard_object_new (mgd, _OBJECT_CLASS, NULL);
 	g_object_set (person, "firstname", _NAME_ARTHUR, NULL);

@@ -347,7 +347,7 @@ midgard_test_connection_set_workspace (void)
 	MidgardConnection *mgd = midgard_test_connection_open_user_config(CONFIG_CONFIG_NAME, &config);
 
 	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
-	gboolean workspace_is_set = midgard_connection_set_workspace (mgd, workspace);
+	gboolean workspace_is_set = midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
 	g_assert (workspace_is_set == TRUE);
 
 	g_object_unref (mgd);
@@ -360,14 +360,14 @@ midgard_test_connection_get_workspace (void)
 	MidgardConfig *config = NULL;
 	MidgardConnection *mgd = midgard_test_connection_open_user_config(CONFIG_CONFIG_NAME, &config);
 
-	MidgardWorkspace *null_workspace = midgard_connection_get_workspace (mgd);
+	MidgardWorkspace *null_workspace = (MidgardWorkspace *)midgard_connection_get_workspace (mgd);
 	g_assert (null_workspace == NULL);
 
 	MidgardWorkspace *workspace = midgard_workspace_new (mgd, NULL);
-	gboolean workspace_is_set = midgard_connection_set_workspace (mgd, workspace);
+	gboolean workspace_is_set = midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
 	g_assert (workspace_is_set == TRUE);
 
-	MidgardWorkspace *connection_workspace = midgard_connection_get_workspace (mgd);
+	MidgardWorkspace *connection_workspace = (MidgardWorkspace *)midgard_connection_get_workspace (mgd);
 	g_assert (connection_workspace == workspace);
 
 	g_object_unref (mgd);
