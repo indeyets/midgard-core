@@ -19,6 +19,8 @@
 #include "midgard_test_object_workspace.h"
 
 #define _OBJECT_CLASS "midgard_person"
+#define _NAME_LANCELOT "Sir Lancelot"
+#define _NAME_ARTHUR "King Arthur"
 
 void 
 midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
@@ -39,7 +41,7 @@ midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpoi
 	gboolean storage_updated = midgard_storage_update (mgd, _OBJECT_CLASS);
 
 	MidgardObject *person = midgard_object_new (mgd, _OBJECT_CLASS, NULL);
-	g_object_set (person, "firstname", "Sir Lancelot", NULL);
+	g_object_set (person, "firstname", _NAME_ARTHUR, NULL);
 	gboolean object_created = midgard_object_create (person);
 	MIDGARD_TEST_ERROR_OK(mgd);
 	g_assert (object_created == TRUE);
@@ -49,6 +51,36 @@ midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpoi
 
 	gchar *ws_name;
 	gchar *object_ws_name;
+
+	g_object_get (workspace, "name", &ws_name, NULL);
+	g_object_get (object_workspace, "name", &object_ws_name, NULL);
+
+	g_assert_cmpstr (ws_name, ==, object_ws_name);
+
+	g_free (ws_name);
+	g_free (object_ws_name);
+
+	g_object_unref (workspace);
+	g_object_unref (person);
+	g_object_unref (object_workspace);
+
+	workspace = midgard_workspace_new ();
+	error = NULL;
+	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_PATH, &error);
+	g_assert (get_by_path == TRUE);
+
+	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
+	midgard_connection_enable_workspace (mgd, TRUE);
+	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
+
+	person = midgard_object_new (mgd, _OBJECT_CLASS, NULL);
+	g_object_set (person, "firstname", _NAME_LANCELOT, NULL);
+	object_created = midgard_object_create (person);
+	MIDGARD_TEST_ERROR_OK(mgd);
+	g_assert (object_created == TRUE);
+
+	object_workspace = midgard_object_get_workspace (person);
+	g_assert (object_workspace != NULL);
 
 	g_object_get (workspace, "name", &ws_name, NULL);
 	g_object_get (object_workspace, "name", &object_ws_name, NULL);
