@@ -39,12 +39,19 @@ struct _MidgardDBObjectPrivate {
 	GdaDataModel *datamodel;
 	gint row;
 	gboolean is_in_storage;
+	gboolean uses_workspace;
 
 	/* GDA pointers */
-	GdaStatement *statement_insert;
-	GdaSet *statement_insert_params;
+	/* INSERT */
+	GdaStatement *_statement_insert;
+	GdaSet *_statement_insert_params;
+	GdaStatement *_workspace_statement_insert;
+	GdaSet *_workspace_statement_insert_params;
+	/* UPDATE */
 	GdaStatement *statement_update;
 	GdaSet *statement_update_params;	
+	GdaStatement *workspace_statement_update;
+	GdaSet *workspace_statement_update_params;	
 
 	/* GdaSql virtual helpers */
 	void			(*add_fields_to_select_statement)	(MidgardDBObjectClass *klass, 
@@ -64,7 +71,8 @@ struct _MidgardDBObjectPrivate {
 
 	/* GDA helpers */
 	/* prepared statements */
-	void			(*set_statement_insert)	(MidgardDBObjectClass *klass);
+	GdaStatement		*(*get_statement_insert)	(MidgardDBObjectClass *klass, MidgardConnection *mgd);
+	GdaSet			*(*get_statement_insert_params)	(MidgardDBObjectClass *klass, MidgardConnection *mgd);
 	void			(*set_statement_update)	(MidgardDBObjectClass *klass);
 	/* static SQL commands */
 	void 			(*set_static_sql_select)	(MidgardConnection *mgd, MidgardDBObjectClass *klass);

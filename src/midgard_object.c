@@ -907,7 +907,8 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	}
 	*/
 
-	tablename = midgard_core_class_get_table(MIDGARD_DBOBJECT_GET_CLASS(object));	
+	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (object);
+	tablename = midgard_core_class_get_table (dbklass);	
 
 	/* FIXME , move this to object_is_valid */
 	if (tablename == NULL) {
@@ -937,7 +938,7 @@ gboolean _midgard_object_create (	MidgardObject *object,
 
 	if (MGD_CNC_USES_WORKSPACE (mgd)) {
 		/* Set workspace context */
-		GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_insert_params;
+		GdaSet *params = dbklass->dbpriv->get_statement_insert_params (dbklass, MGD_OBJECT_CNC (object));
 		/* Workspace id */
 		gda_set_set_holder_value (params, &err, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
 		if (err) {
@@ -1735,6 +1736,8 @@ __mgdschema_class_init(gpointer g_class, gpointer class_data)
 
 		mklass->priv = g_new (MidgardObjectClassPrivate, 1);
 		dbklass->dbpriv = g_new (MidgardDBObjectPrivate, 1);	
+
+		dbklass->dbpriv->uses_workspace = TRUE;
 
 		/* Check metadata. No support for user declared one yet. */
 		if (data->metadata_class_name == NULL) 

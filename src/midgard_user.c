@@ -1505,6 +1505,7 @@ static void _midgard_user_class_init(
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->storage_data->table = g_strdup(MIDGARD_USER_TABLE);
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->storage_data->tables = g_strdup(MIDGARD_USER_TABLE);
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->has_metadata = FALSE;
+	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->uses_workspace = FALSE;
 
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->__set_from_sql = __set_from_sql;
 	MIDGARD_DBOBJECT_CLASS (klass)->dbpriv->set_from_sql = NULL;

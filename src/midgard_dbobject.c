@@ -284,7 +284,7 @@ __statement_insert_add_metadata_fields (MidgardDBObjectClass *klass, GString *co
 }
 
 static void
-__initialize_statement_insert_query_parameters (MidgardDBObjectClass *klass, const gchar *query_string)
+__initialize_statement_insert_query_parameters (MidgardDBObjectClass *klass, const gchar *query_string, gboolean add_workspace)
 {
 	GdaSqlParser *parser = gda_sql_parser_new ();
 	GdaStatement *stmt;
@@ -304,14 +304,19 @@ __initialize_statement_insert_query_parameters (MidgardDBObjectClass *klass, con
 				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
 	}
 	
-	klass->dbpriv->statement_insert = stmt;
-	klass->dbpriv->statement_insert_params = params;
+	klass->dbpriv->_statement_insert = stmt;
+	klass->dbpriv->_statement_insert_params = params;
+
+	if (add_workspace) {
+		klass->dbpriv->_workspace_statement_insert = stmt;
+		klass->dbpriv->_workspace_statement_insert_params = params;
+	}
 	
 	return;
 }
 
 static gchar *
-__initialize_statement_insert_query_string (MidgardDBObjectClass *klass)
+__initialize_statement_insert_query_string (MidgardDBObjectClass *klass, gboolean add_workspace)
 {
 	GString *sql = g_string_new ("INSERT INTO ");
 	guint n_props;
@@ -350,6 +355,13 @@ __initialize_statement_insert_query_string (MidgardDBObjectClass *klass)
 		add_coma = TRUE;
 	}
 
+	/* Add workspace context columns */
+	if (add_workspace) {
+		g_string_append_printf (colnames, ", %s, %s", MGD_WORKSPACE_OID_FIELD, MGD_WORKSPACE_ID_FIELD);
+		g_string_append_printf (values, ", ##%s::guint", MGD_WORKSPACE_OID_FIELD);
+		g_string_append_printf (values, ", ##%s::guint", MGD_WORKSPACE_ID_FIELD);
+	}
+
 	__statement_insert_add_metadata_fields (klass, colnames, values);
 
 	g_string_append_printf (sql, " (%s) VALUES (%s)", colnames->str, values->str);		
@@ -360,21 +372,45 @@ __initialize_statement_insert_query_string (MidgardDBObjectClass *klass)
 	return g_string_free (sql, FALSE);
 }
 
-static void
-__initialize_statement_insert (MidgardDBObjectClass *klass)
+static GdaStatement *
+__get_statement_insert (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 {
-	gchar *query = __initialize_statement_insert_query_string (klass);
-	__initialize_statement_insert_query_parameters (klass, query);
-	g_free (query);
+	gchar *query = NULL;
+
+	/* Try workspace statement first */
+	if (klass->dbpriv->uses_workspace && (mgd && MGD_CNC_USES_WORKSPACE (mgd))) {
+		
+		if (!klass->dbpriv->_workspace_statement_insert) {
+			query = __initialize_statement_insert_query_string (klass, TRUE);
+			__initialize_statement_insert_query_parameters (klass, query);
+			g_string_free (query);
+		}
+
+		return klass->dbpriv->_workspave_statement_insert;
+	}
+
+	if (klass->dbpriv->_statement_insert != NULL) {
+		query = __initialize_statement_insert_query_string (klass, FALSE);
+		__initialize_statement_insert_query_parameters (klass, query);
+		g_free (query);
+	}
+
+	return klass->dbpriv->_statement_insert;
 }
 
-static void
-__initialize_workspace_statement_insert (MidgardDBObjectClass *klass)
+static GdaSet *
+__get_statement_insert_params (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 {
-	gchar *query = __initialize_statement_insert_query_string (klass);
-	/* TODO, add workspace fields */
-	__initialize_statement_insert_query_parameters (klass, query);
-	g_free (query);
+	GdaStatement *stmt = klass->dbpriv->get_statement_insert (klass, mgd);
+	if (!stmt) {
+		g_error ("Failed to set GdaStatemtn and GdaSet (%s)", G_OBJECT_CLASS_NAME (klass));
+		return NULL;
+	}
+
+	if (klass->dbpriv->uses_workspace && (mgd && MGD_CNC_USES_WORKSPACE (mgd)))
+		return klass->dbpriv->_workspace_statement_insert_params;
+
+	return klass->dbpriv->_statement_insert_params;
 }
 
 static void
@@ -654,11 +690,13 @@ midgard_dbobject_class_init (MidgardDBObjectClass *klass, gpointer g_class_data)
 	klass->dbpriv->get_property = _midgard_dbobject_get_property;
 	klass->dbpriv->set_property = _midgard_dbobject_set_property;
 	klass->dbpriv->set_from_data_model = _midgard_dbobject_set_from_data_model;
-	klass->dbpriv->statement_insert = NULL;
-	klass->dbpriv->set_statement_insert = __initialize_statement_insert;	
+	klass->dbpriv->_statement_insert = NULL;
+	klass->dbpriv->_statement_insert_params = NULL;
+	klass->dbpriv->get_statement_insert = __get_statement_insert;	
 	klass->dbpriv->statement_update = NULL;
 	klass->dbpriv->set_statement_update = __initialize_statement_update;
 	klass->dbpriv->set_static_sql_select = NULL;
+	klass->dbpriv->uses_workspace = FALSE;
 
 	/* Properties */
 	GParamSpec *pspec = g_param_spec_object ("connection",
