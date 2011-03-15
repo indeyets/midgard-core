@@ -97,13 +97,19 @@ midgard_test_object_workspace_create (MidgardObjectWorkspaceTest *mwt, gconstpoi
 }
 
 void 
+midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
+{
+	g_print (MISS_IMPL);
+}
+
+void 
 midgard_test_object_workspace_update (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
 {
 	g_print (MISS_IMPL);
 }
 
 void 
-midgard_test_object_workspace_select (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
+midgard_test_object_workspace_select_updated (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
 {
 	g_print (MISS_IMPL);
 }
