@@ -33,6 +33,7 @@
 #include "midgard_query_value.h"
 #include "midgard_query_constraint.h"
 #include "midgard_query_select.h"
+#include "midgard_executable.h"
 
 /* Do not use _DB_DEFAULT_DATETIME.
  * Some databases (like MySQL) fails to create datetime column with datetime which included timezone. 
@@ -2325,7 +2326,7 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	midgard_query_executor_set_constraint (MIDGARD_QUERY_EXECUTOR (select), constraint);
 
 	GError *err = NULL;
-	midgard_query_executable_execute (MIDGARD_QUERY_EXECUTABLE (select), &err);
+	midgard_executable_execute (MIDGARD_EXECUTABLE (select), &err);
 	if (err) {
 		g_propagate_error (error, err);
 		goto free_objects_and_return;
@@ -2343,7 +2344,7 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 			if (_objects)
 				g_free (_objects);
 		} else if (n_objects == 1) {
-			object = _objects[i];
+			*object = _objects[i];
 			g_free (_objects);
 		}
 
@@ -2352,10 +2353,10 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 
 	/* Object is given, so let's set its properties */
 	GdaDataModel *model = GDA_DATA_MODEL (MIDGARD_QUERY_EXECUTOR (select)->priv->resultset);
-	MGD_OBJECT_IN_STORAGE (object) = TRUE;
+	MGD_OBJECT_IN_STORAGE (*object) = TRUE;
 	MIDGARD_DBOBJECT(object)->dbpriv->datamodel = g_object_ref (model);
 	MIDGARD_DBOBJECT(object)->dbpriv->row = 0;
-	MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (object), model, 0);
+	MIDGARD_DBOBJECT_GET_CLASS (*object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (*object), model, 0);
 
 free_objects_and_return:
 	for (l = objects_list; l != NULL; l = l->next) {
