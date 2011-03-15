@@ -694,7 +694,8 @@ midgard_dbobject_class_init (MidgardDBObjectClass *klass, gpointer g_class_data)
 	klass->dbpriv->set_from_data_model = _midgard_dbobject_set_from_data_model;
 	klass->dbpriv->_statement_insert = NULL;
 	klass->dbpriv->_statement_insert_params = NULL;
-	klass->dbpriv->get_statement_insert = __get_statement_insert;	
+	klass->dbpriv->get_statement_insert = __get_statement_insert;
+	klass->dbpriv->get_statement_insert_params = __get_statement_insert_params;	
 	klass->dbpriv->statement_update = NULL;
 	klass->dbpriv->set_statement_update = __initialize_statement_update;
 	klass->dbpriv->set_static_sql_select = NULL;
