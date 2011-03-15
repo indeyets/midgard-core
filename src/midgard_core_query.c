@@ -2333,7 +2333,7 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	}
 
 	/* There's no object given, so we initialize new object */
-	if (!object) {
+	if (*object == NULL) {
 		guint i;
 		guint n_objects;
 		MidgardDBObject **_objects = midgard_query_select_list_objects (select, &n_objects);
@@ -2354,8 +2354,8 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	/* Object is given, so let's set its properties */
 	GdaDataModel *model = GDA_DATA_MODEL (MIDGARD_QUERY_EXECUTOR (select)->priv->resultset);
 	MGD_OBJECT_IN_STORAGE (*object) = TRUE;
-	MIDGARD_DBOBJECT(object)->dbpriv->datamodel = g_object_ref (model);
-	MIDGARD_DBOBJECT(object)->dbpriv->row = 0;
+	MIDGARD_DBOBJECT(*object)->dbpriv->datamodel = g_object_ref (model);
+	MIDGARD_DBOBJECT(*object)->dbpriv->row = 0;
 	MIDGARD_DBOBJECT_GET_CLASS (*object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (*object), model, 0);
 
 free_objects_and_return:
