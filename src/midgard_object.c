@@ -1188,45 +1188,25 @@ gboolean midgard_object_get_by_id(MidgardObject *object, guint id)
 	/* Stop when property is not uint type */
 	g_assert((prop->value_type == G_TYPE_UINT));
 	
-	/* Initialize QB */
-	MidgardQueryBuilder *builder =
-		midgard_query_builder_new(MGD_OBJECT_CNC (object), 
-				G_OBJECT_TYPE_NAME(object));
-	
-	if (!builder) {
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (object), MGD_ERR_INTERNAL);
-		g_warning("Invalid query builder configuration (%s)",
-				G_OBJECT_TYPE_NAME(object));
-		return FALSE;
-	}
-
 	/* Get primary's property value */
 	GValue pval = {0,};
 	g_value_init(&pval,prop->value_type);	
 	g_value_set_uint(&pval, id);
-	if (midgard_query_builder_add_constraint(builder,
-				"id",
-				"=", &pval)) {
-
-		GSList *olist =
-			midgard_core_qb_set_object_from_query(builder, MQB_SELECT_OBJECT, &object);
-		g_value_unset(&pval);
-		g_object_unref(G_OBJECT(builder));
-		
-		if (!olist) {
-			
-			MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_NOT_EXISTS);
-			return FALSE;
-		}
-		
-		g_slist_free(olist);
-		
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_OK);
-		__dbus_send(object, "get");
-		return TRUE;
-	}
 	
-	return FALSE;
+	/* Get object using 'id' constraint */
+	GError *err = NULL;
+	midgard_core_query_get_object (MGD_OBJECT_CNC (object), NULL, (MidgardDBObject **)&object, &err, "id", &pval, NULL);
+	g_value_unset (&pval);
+	if (err) {
+		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC(object), MGD_ERR_NOT_EXISTS, "%s", 
+				err && err->message ? err->message : "Unknown reason");
+		g_clear_error (&err);
+		return FALSE;
+	}
+
+	MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_OK);
+	__dbus_send(object, "get");
+	return TRUE;
 }
 
 static gboolean 
@@ -2060,7 +2040,7 @@ midgard_object_new (MidgardConnection *mgd, const gchar *name, GValue *value)
 	MIDGARD_ERRNO_SET (mgd, MGD_ERR_OK);
 
 	GType type = g_type_from_name (name);
-	MidgardObject *self;
+	MidgardObject *self = NULL;
 	const gchar *field = "id";	
 
 	if (!type)
@@ -2102,20 +2082,15 @@ midgard_object_new (MidgardConnection *mgd, const gchar *name, GValue *value)
 			if (guidval && !midgard_is_guid (guidval))
 				goto return_null_with_error;
 		}
-		
-		MidgardQueryBuilder *builder = midgard_query_builder_new(mgd, name);
-		midgard_query_builder_add_constraint(builder, field, "=", value);
-		guint n_objects;
-		GObject **objects = midgard_query_builder_execute(builder, &n_objects);
-		g_object_unref(builder);
-
-		if (!objects) {
-			MIDGARD_ERRNO_SET(mgd, MGD_ERR_NOT_EXISTS);				
+	
+		GError *err = NULL;
+		midgard_core_query_get_object (mgd, name, (MidgardDBObject **)&self, &err, field, value, NULL);
+		if (err) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_NOT_EXISTS, "%s", 
+					err && err->message ? err->message : "Unknown reason");
+			g_clear_error (&err);
 			return NULL;
 		}
-
-		self = MIDGARD_OBJECT(objects[0]);
-		g_free(objects);	
 
 		if (!self) {
 			MIDGARD_ERRNO_SET(mgd, MGD_ERR_INTERNAL);
@@ -2123,8 +2098,7 @@ midgard_object_new (MidgardConnection *mgd, const gchar *name, GValue *value)
 		}
 
 		__dbus_send(self, "get");
-		MIDGARD_DBOBJECT (self)->dbpriv->storage_data = MIDGARD_DBOBJECT_GET_CLASS(self)->dbpriv->storage_data;
-		MGD_OBJECT_CNC (self) = mgd;	
+		MIDGARD_DBOBJECT (self)->dbpriv->storage_data = MIDGARD_DBOBJECT_GET_CLASS(self)->dbpriv->storage_data;	
 		
 		return self;
 	}
@@ -2376,42 +2350,24 @@ gboolean midgard_object_get_by_guid(MidgardObject *object, const gchar *guid)
 		return FALSE;
 	}
 	
-	MidgardQueryBuilder *builder =
-		midgard_query_builder_new(MGD_OBJECT_CNC (object),
-				G_OBJECT_TYPE_NAME(object));
-	if (!builder) {
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (object), MGD_ERR_INTERNAL);
+	GValue pval = {0,};
+	g_value_init(&pval,G_TYPE_STRING);
+	g_value_set_string(&pval, guid);
+
+	GError *err = NULL;
+	midgard_core_query_get_object (MGD_OBJECT_CNC (object), NULL, (MidgardDBObject **)&object, &err, "guid", &pval, NULL);
+	g_value_unset (&pval);
+
+	if (err) {
+		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (object), MGD_ERR_NOT_EXISTS, "%s", 
+				err && err->message ? err->message : "Unknown reason");
+		g_clear_error (&err);
 		return FALSE;
 	}
 
-	GValue pval = {0,};
-	g_value_init(&pval,G_TYPE_STRING);
-	g_value_set_string(&pval, guid);	
-	if (midgard_query_builder_add_constraint(builder,
-				"guid",
-				"=", &pval)) {
-	
-		GSList *olist =
-			midgard_core_qb_set_object_from_query(builder, MQB_SELECT_OBJECT, &object);
-		
-		g_value_unset(&pval);
-		g_object_unref(G_OBJECT(builder));
-		
-		if (!olist) {
-			
-			MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_NOT_EXISTS);
-			return FALSE;
-		}
-
-		g_slist_free(olist);
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_OK);
-		__dbus_send(object, "get");
-		return TRUE;
-
-	} 
-	
-	MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (object), MGD_ERR_NOT_EXISTS);
-	return FALSE;	
+	MIDGARD_ERRNO_SET(MGD_OBJECT_CNC(object), MGD_ERR_OK);
+	__dbus_send(object, "get");
+	return TRUE;
 }
 
 
