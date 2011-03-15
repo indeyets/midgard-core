@@ -289,5 +289,6 @@ gboolean		midgard_core_query_update_dbobject_record 	(MidgardDBObject *object);
 gchar                   *midgard_core_query_binary_stringify            (GValue *src_value); 
 gchar 			*midgard_core_query_compute_constraint_property	(MidgardQueryExecutor *executor, MidgardQueryStorage *storage, const gchar *name, GError **error);
 gchar 			*midgard_core_query_unescape_string (MidgardConnection *mgd, const gchar *str);
+void			midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, MidgardDBObject **object, GError **error, const gchar *property, ...);
 
 #endif /* MIDGARD_CORE_QUERY_H */

@@ -30,6 +30,9 @@
 #include "midgard_metadata.h"
 #include "midgard_reflector_object.h"
 #include "midgard_validable.h"
+#include "midgard_query_value.h"
+#include "midgard_query_constraint.h"
+#include "midgard_query_select.h"
 
 /* Do not use _DB_DEFAULT_DATETIME.
  * Some databases (like MySQL) fails to create datetime column with datetime which included timezone. 
@@ -2261,3 +2264,106 @@ midgard_core_query_unescape_string (MidgardConnection *mgd, const gchar *string)
 	return retval;		
 }
 
+void
+midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, MidgardDBObject **object, GError **error, const gchar *property, ...)
+{
+	if (mgd == NULL) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Expected MidgardConnection. Can not get object.");
+		return;
+	}
+
+	if (classname == NULL) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Expected class name. Can not get object.");
+		return;
+	}
+
+	const gchar *cname = classname;
+	if (*object) 
+		cname = G_OBJECT_TYPE_NAME (*object);
+
+	GSList *arg_list = NULL;
+	GSList *objects_list = NULL;
+	GSList *l = NULL;
+
+	/* Create all constraints if there are any arguments */
+	const gchar *property_name = property;
+	GValue *cnstr_value;
+	va_list args;
+	va_start (args, property);
+	while (property_name != NULL) {
+		cnstr_value = va_arg (args, GValue *);
+		MidgardQueryProperty *mqp = midgard_query_property_new (property_name, NULL);
+		objects_list = g_slist_prepend (objects_list, (gpointer) mqp);
+		MidgardQueryValue *mqv = midgard_query_value_create_with_value ((const GValue*) cnstr_value);
+		objects_list = g_slist_prepend (objects_list, (gpointer) mqv);
+		MidgardQueryConstraint *mqc = midgard_query_constraint_new (mqp, "=", MIDGARD_QUERY_HOLDER (mqv), NULL);
+		objects_list = g_slist_prepend (objects_list, (gpointer) mqc);
+		arg_list = g_slist_prepend (arg_list, mqc);
+		property_name = va_arg (args, gchar *);
+	}
+	va_end (args);
+
+	if (arg_list == NULL) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Expected at last one constraint to get object");
+		return;
+	}
+
+	/* We need either group or one constraint */
+	MidgardQueryConstraintSimple *constraint = NULL;
+	if (g_slist_length (arg_list) > 1) {
+		constraint = (MidgardQueryConstraintSimple*) midgard_query_constraint_group_new ();
+		for (l = arg_list; l != NULL; l = l->next) {
+			midgard_query_constraint_group_add_constraint (constraint, (MidgardQueryConstraintSimple *) l->data);
+		}
+	} else {
+		constraint = (MidgardQueryConstraintSimple *) arg_list->data;
+	}
+	g_slist_free (arg_list);
+	
+	MidgardQueryStorage *storage = midgard_query_storage_new (cname);
+	MidgardQuerySelect *select = midgard_query_select_new (mgd, storage);
+	midgard_query_executor_set_constraint (MIDGARD_QUERY_EXECUTOR (select), constraint);
+
+	GError *err = NULL;
+	midgard_query_executable_execute (MIDGARD_QUERY_EXECUTABLE (select), &err);
+	if (err) {
+		g_propagate_error (error, err);
+		goto free_objects_and_return;
+	}
+
+	/* There's no object given, so we initialize new object */
+	if (!object) {
+		guint i;
+		guint n_objects;
+		MidgardDBObject **_objects = midgard_query_select_list_objects (select, &n_objects);
+		if (n_objects > 1) {
+			g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Too many objects to get");
+			for (i = 0; i < n_objects; i++)
+				g_object_unref (_objects[i]);
+			if (_objects)
+				g_free (_objects);
+		} else if (n_objects == 1) {
+			object = _objects[i];
+			g_free (_objects);
+		}
+
+		goto free_objects_and_return;
+	}
+
+	/* Object is given, so let's set its properties */
+	GdaDataModel *model = GDA_DATA_MODEL (MIDGARD_QUERY_EXECUTOR (select)->priv->resultset);
+	MGD_OBJECT_IN_STORAGE (object) = TRUE;
+	MIDGARD_DBOBJECT(object)->dbpriv->datamodel = g_object_ref (model);
+	MIDGARD_DBOBJECT(object)->dbpriv->row = 0;
+	MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (object), model, 0);
+
+free_objects_and_return:
+	for (l = objects_list; l != NULL; l = l->next) {
+		g_object_unref ((GObject*) l->data);
+	}
+	g_slist_free (objects_list);
+	g_object_unref (storage);
+	g_object_unref (select);
+
+	return;
+}
