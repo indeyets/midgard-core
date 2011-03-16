@@ -2324,6 +2324,7 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	MidgardQueryStorage *storage = midgard_query_storage_new (cname);
 	MidgardQuerySelect *select = midgard_query_select_new (mgd, storage);
 	midgard_query_executor_set_constraint (MIDGARD_QUERY_EXECUTOR (select), constraint);
+	midgard_query_select_toggle_read_only (select, FALSE);
 
 	GError *err = NULL;
 	midgard_executable_execute (MIDGARD_EXECUTABLE (select), &err);
