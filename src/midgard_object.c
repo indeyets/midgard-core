@@ -1449,27 +1449,40 @@ __add_fields_to_select_statement (MidgardDBObjectClass *klass, MidgardConnection
 }
 
 static void
-__set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row)
+__set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, guint column_id)
 {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (model != NULL);
 	g_return_if_fail (row > -1);
 
-	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
-	if (mgd && !MGD_CNC_USES_WORKSPACE (mgd)) {
-		MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row);
-		return;
-	}
-
 	GError *error = NULL;
 	const GValue *value;
 
+	/* guid */
+	value = gda_data_model_get_value_at (model, column_id, row, &error);
+	if (!value) {
+		g_warning ("Failed to get guid value: %s", error && error->message ? error->message : "Unknown reason");
+		if (error)
+			g_clear_error (&error);
+	} else {
+		g_free ((gchar *)MGD_OBJECT_GUID (self));
+		MGD_OBJECT_GUID (self) = g_value_dup_string (value);
+	}
+	if (error) g_clear_error (&error);
+
+	column_id++;
+
+	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row, column_id);
+
+	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	if (mgd && !MGD_CNC_USES_WORKSPACE (mgd)) 
+		return;
+
 	guint id;
-#warning "FIX START FIELD"
-	guint start_field = 0;
 
 	/* object ws id */
-	value = gda_data_model_get_value_at (model, start_field, row, &error);
+	gint ws_idx = gda_data_model_get_column_index (model, MGD_WORKSPACE_OID_FIELD);
+	value = gda_data_model_get_value_at (model, ws_idx, row, &error);
 	if (!value) {
 		g_warning ("Failed to get ws_root_id: %s", error && error->message ? error->message : "Unknown reason");
 		if (error)
@@ -1485,7 +1498,8 @@ __set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row)
 	if (error) g_clear_error (&error);
 
 	/* ws id */
-	value = gda_data_model_get_value_at (model, ++start_field, row, &error);
+	ws_idx = gda_data_model_get_column_index (model, MGD_WORKSPACE_ID_FIELD);
+	value = gda_data_model_get_value_at (model, ws_idx, row, &error);
 	if (!value) {
 		g_warning ("Failed to get ws_id: %s", error && error->message ? error->message : "Unknown reason");
 		if (error)
@@ -1499,21 +1513,6 @@ __set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row)
 		MGD_OBJECT_WS_ID (self) = id;
 	}
 	if (error) g_clear_error (&error);
-
-	/* guid */
-	value = gda_data_model_get_value_at (model, ++start_field, row, &error);
-	if (!value) {
-		g_warning ("Failed to get guid value: %s", error && error->message ? error->message : "Unknown reason");
-		if (error)
-			g_clear_error (&error);
-	} else {
-		g_free ((gchar *)MGD_OBJECT_GUID (self));
-		MGD_OBJECT_GUID (self) = g_value_dup_string (value);
-	}
-	if (error) g_clear_error (&error);
-
-	/* chain up */
-	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row);
 }
 
 static void
@@ -3938,9 +3937,10 @@ midgard_object_get_workspace (MidgardObject *self)
 		return NULL;
 	}
 
+#warning "Get workspace via WorkspaceManager"	
 	MidgardWorkspace *ws = midgard_workspace_new (mgd, NULL);
 	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (ws);
-	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id);
+	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (ws), mgd->priv->workspace_model, row_id, 0);
 
 	return ws;
 }

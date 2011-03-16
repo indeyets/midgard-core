@@ -2363,7 +2363,7 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	MGD_OBJECT_IN_STORAGE (*object) = TRUE;
 	MIDGARD_DBOBJECT(*object)->dbpriv->datamodel = g_object_ref (model);
 	MIDGARD_DBOBJECT(*object)->dbpriv->row = 0;
-	MIDGARD_DBOBJECT_GET_CLASS (*object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (*object), model, 0);
+	MIDGARD_DBOBJECT_GET_CLASS (*object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (*object), model, 0, 0);
 
 free_objects_and_return:
 	for (l = objects_list; l != NULL; l = l->next) {

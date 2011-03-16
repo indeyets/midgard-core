@@ -71,7 +71,7 @@ _midgard_workspace_get_by_path (const MidgardWorkspaceManager *manager, MidgardW
 	}
 
 	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (self);
-	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (self), mgd->priv->workspace_model, row_id);
+	dbklass->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (self), mgd->priv->workspace_model, row_id, 0);
 
 	return TRUE;
 }
@@ -657,7 +657,7 @@ _workspace_storage_delete (MidgardConnection *mgd, MidgardDBObjectClass *klass)
 }
 
 static void
-_set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, gint start_field)
+_set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row, guint column_id)
 {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (model != NULL);

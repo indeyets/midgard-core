@@ -777,7 +777,7 @@ _midgard_query_select_list_objects (MidgardQuerySelect *self, guint *n_objects)
 			}
 		} else {
 			MIDGARD_DBOBJECT_GET_CLASS (objects[i])->dbpriv->set_from_data_model (
-					MIDGARD_DBOBJECT (objects[i]), model, i);
+					MIDGARD_DBOBJECT (objects[i]), model, i, 0);
 		}
 	}
 
