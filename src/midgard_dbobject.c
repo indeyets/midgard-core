@@ -391,7 +391,7 @@ __get_statement_insert (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 		return klass->dbpriv->_workspace_statement_insert;
 	}
 
-	if (klass->dbpriv->_statement_insert != NULL) {
+	if (!klass->dbpriv->_statement_insert) {
 		query = __initialize_statement_insert_query_string (klass, FALSE);
 		__initialize_statement_insert_query_parameters (klass, query, FALSE);
 		g_free (query);
@@ -405,7 +405,7 @@ __get_statement_insert_params (MidgardDBObjectClass *klass, MidgardConnection *m
 {
 	GdaStatement *stmt = klass->dbpriv->get_statement_insert (klass, mgd);
 	if (!stmt) {
-		g_error ("Failed to set GdaStatemtn and GdaSet (%s)", G_OBJECT_CLASS_NAME (klass));
+		g_error ("Failed to get GdaStatement and GdaSet (%s)", G_OBJECT_CLASS_NAME (klass));
 		return NULL;
 	}
 
@@ -668,6 +668,33 @@ __midgard_dbobject_set_property (GObject *object, guint property_id,
 	}
 }
 
+MidgardDBObjectPrivate *
+midgard_core_dbobject_private_new ()
+{
+	MidgardDBObjectPrivate *dbpriv = g_new (MidgardDBObjectPrivate, 1);
+	dbpriv->storage_data = NULL;
+	dbpriv->create_storage = NULL;
+	dbpriv->update_storage = NULL;
+	dbpriv->storage_exists = NULL;
+	dbpriv->delete_storage = NULL;
+	dbpriv->add_fields_to_select_statement = NULL;
+	dbpriv->get_property = NULL;
+	dbpriv->set_property = NULL;
+	dbpriv->set_from_data_model = NULL;
+	dbpriv->_statement_insert = NULL;
+	dbpriv->_statement_insert_params = NULL;
+	dbpriv->_workspace_statement_insert = NULL;
+	dbpriv->_workspace_statement_insert_params = NULL;
+	dbpriv->get_statement_insert = NULL;
+	dbpriv->get_statement_insert_params = NULL;	
+	dbpriv->statement_update = NULL;
+	dbpriv->set_statement_update = NULL;
+	dbpriv->set_static_sql_select = NULL;
+	dbpriv->uses_workspace = FALSE;
+
+	return dbpriv;
+}
+
 static void 
 midgard_dbobject_class_init (MidgardDBObjectClass *klass, gpointer g_class_data)
 {
@@ -694,6 +721,8 @@ midgard_dbobject_class_init (MidgardDBObjectClass *klass, gpointer g_class_data)
 	klass->dbpriv->set_from_data_model = _midgard_dbobject_set_from_data_model;
 	klass->dbpriv->_statement_insert = NULL;
 	klass->dbpriv->_statement_insert_params = NULL;
+	klass->dbpriv->_workspace_statement_insert = NULL;
+	klass->dbpriv->_workspace_statement_insert_params = NULL;
 	klass->dbpriv->get_statement_insert = __get_statement_insert;
 	klass->dbpriv->get_statement_insert_params = __get_statement_insert_params;	
 	klass->dbpriv->statement_update = NULL;

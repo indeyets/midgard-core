@@ -80,6 +80,8 @@ struct _MidgardDBObjectPrivate {
 
 };
 
+MidgardDBObjectPrivate	*midgard_core_dbobject_private_new 	(void);
+
 #define MGD_DBOBJECT_DBPRIV(__obj) (MIDGARD_DBOBJECT(__obj)->dbpriv)
 
 #define MGD_OBJECT_GUID(___obj) MIDGARD_DBOBJECT(___obj)->dbpriv->guid
