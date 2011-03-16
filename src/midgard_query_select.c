@@ -614,7 +614,7 @@ _midgard_query_select_executable_iface_execute (MidgardExecutable *iface, GError
 	texpr->value = tval;
 	s_target->expr = texpr;
 
-	/* Add fields for all properties registered per class (SELECT a,b,c...) */	
+	/* Add fields for all properties registered per class (SELECT a,b,c...) */
 	klass->dbpriv->add_fields_to_select_statement (klass, mgd, sss, s_target->as);
 
 	GdaSqlExpr *where = sss->where_cond;

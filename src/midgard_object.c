@@ -939,6 +939,12 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	if (MGD_CNC_USES_WORKSPACE (mgd)) {
 		/* Set workspace context */
 		GdaSet *params = dbklass->dbpriv->get_statement_insert_params (dbklass, MGD_OBJECT_CNC (object));
+		if (!params) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, 
+					"Failed to get parameters for prepared INSERT statement (%s).",  
+					G_OBJECT_CLASS_NAME (dbklass));
+			return FALSE;
+		}
 		/* Workspace id */
 		gda_set_set_holder_value (params, &err, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
 		if (err) {
@@ -1400,12 +1406,18 @@ _mgdschema_class_set_static_sql_select (MidgardConnection *mgd, MidgardDBObjectC
 }
 
 static void
-__add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cnc, GdaSqlStatementSelect *select, const gchar *table_name)
+__add_fields_to_select_statement (MidgardDBObjectClass *klass, MidgardConnection *mgd, GdaSqlStatementSelect *select, const gchar *table_name)
 {
 	GdaSqlSelectField *select_field;
 	GdaSqlExpr *expr;
 	GValue *val;
 	gchar *table_field;
+	GdaConnection *cnc = mgd->priv->connection;
+
+	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement (klass, mgd, select, table_name);
+
+	if (mgd && !MGD_CNC_USES_WORKSPACE (mgd))
+		return;
 
 	/* Add workspace identifiers */
 
@@ -1434,8 +1446,6 @@ __add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cn
 	g_free (table_field);
 	expr->value = val;
 	select_field->expr = expr;
-
-	MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement (klass, cnc, select, table_name);
 }
 
 static void
@@ -1444,6 +1454,12 @@ __set_from_data_model (MidgardDBObject *self, GdaDataModel *model, gint row)
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (model != NULL);
 	g_return_if_fail (row > -1);
+
+	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	if (mgd && !MGD_CNC_USES_WORKSPACE (mgd)) {
+		MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model (self, model, row);
+		return;
+	}
 
 	GError *error = NULL;
 	const GValue *value;
@@ -1659,7 +1675,7 @@ __mgdschema_class_init(gpointer g_class, gpointer class_data)
 	if (mklass) {
 
 		mklass->priv = g_new (MidgardObjectClassPrivate, 1);
-		dbklass->dbpriv = g_new (MidgardDBObjectPrivate, 1);	
+		dbklass->dbpriv = midgard_core_dbobject_private_new ();	
 
 		dbklass->dbpriv->uses_workspace = TRUE;
 
@@ -1678,9 +1694,9 @@ __mgdschema_class_init(gpointer g_class, gpointer class_data)
 		dbklass->dbpriv->update_storage = _object_update_storage;
 		dbklass->dbpriv->storage_exists = _object_storage_exists;
 		dbklass->dbpriv->delete_storage = _object_delete_storage;
-		dbklass->dbpriv->add_fields_to_select_statement = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->add_fields_to_select_statement;
+		dbklass->dbpriv->add_fields_to_select_statement = __add_fields_to_select_statement ; 
 		dbklass->dbpriv->get_property = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->get_property;
-		dbklass->dbpriv->set_from_data_model = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_from_data_model;
+		dbklass->dbpriv->set_from_data_model = __set_from_data_model;
 		dbklass->dbpriv->get_statement_insert = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->get_statement_insert;
 		dbklass->dbpriv->get_statement_insert_params = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->get_statement_insert_params;
 		dbklass->dbpriv->set_statement_update = MIDGARD_DBOBJECT_CLASS (__mgdschema_parent_class)->dbpriv->set_statement_update;

@@ -27,7 +27,7 @@ static GObjectClass *parent_class= NULL;
 
 /* Create GdaSqlSelectField for every property registered for the class. */
 void
-_add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cnc, GdaSqlStatementSelect *select, const gchar *table_name)
+_add_fields_to_select_statement (MidgardDBObjectClass *klass, MidgardConnection *mgd, GdaSqlStatementSelect *select, const gchar *table_name)
 {
 	guint n_prop;
 	guint i;
@@ -35,6 +35,8 @@ _add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cnc
 	GdaSqlExpr *expr;
 	GValue *val;
 	gchar *table_field;
+	GdaConnection *cnc = mgd->priv->connection;
+
 	GParamSpec **pspecs = g_object_class_list_properties (G_OBJECT_CLASS (klass), &n_prop);
 	if (!pspecs)
 		return;
@@ -85,7 +87,7 @@ _add_fields_to_select_statement (MidgardDBObjectClass *klass, GdaConnection *cnc
 			return;
 
 		if (MIDGARD_DBOBJECT_CLASS (mklass)->dbpriv->add_fields_to_select_statement) {
-			MIDGARD_DBOBJECT_CLASS (mklass)->dbpriv->add_fields_to_select_statement (MIDGARD_DBOBJECT_CLASS (mklass), cnc, select, table_name);
+			MIDGARD_DBOBJECT_CLASS (mklass)->dbpriv->add_fields_to_select_statement (MIDGARD_DBOBJECT_CLASS (mklass), mgd, select, table_name);
 			return;
 		}
 
