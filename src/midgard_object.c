@@ -2086,14 +2086,14 @@ midgard_object_new (MidgardConnection *mgd, const gchar *name, GValue *value)
 		GError *err = NULL;
 		midgard_core_query_get_object (mgd, name, &self, &err, field, value, NULL);
 		if (err) {
-			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_NOT_EXISTS, "%s", 
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, "%s", 
 					err && err->message ? err->message : "Unknown reason");
 			g_clear_error (&err);
 			return NULL;
 		}
 
 		if (!self) {
-			MIDGARD_ERRNO_SET(mgd, MGD_ERR_INTERNAL);
+			MIDGARD_ERRNO_SET(mgd, MGD_ERR_NOT_EXISTS);
 			return NULL;
 		}
 
