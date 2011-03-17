@@ -59,6 +59,8 @@ int main (int argc, char *argv[])
 			midgard_test_object_workspace_create, midgard_test_object_workspace_teardown_foo);
 	g_test_add("/midgard_object/workspace/select_created", MidgardObjectWorkspaceTest, mw, midgard_test_object_workspace_setup,  
 			midgard_test_object_workspace_select_created, midgard_test_object_workspace_teardown_foo);
+	g_test_add("/midgard_object/workspace_context/select_created", MidgardObjectWorkspaceTest, mw, midgard_test_object_workspace_setup,  
+			midgard_test_object_workspace_context_select_created, midgard_test_object_workspace_teardown_foo);
 	g_test_add("/midgard_object/workspace/update", MidgardObjectWorkspaceTest, mw, midgard_test_object_workspace_setup,  
 			midgard_test_object_workspace_update, midgard_test_object_workspace_teardown_foo);
 	g_test_add("/midgard_object/workspace/select_updated", MidgardObjectWorkspaceTest, mw, midgard_test_object_workspace_setup,  

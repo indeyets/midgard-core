@@ -116,12 +116,13 @@ midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, g
 	GError *error = NULL;
 	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
 	g_assert (get_by_path == TRUE);
+	g_assert (MIDGARD_IS_WORKSPACE (workspace));
 
 	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
 	midgard_connection_enable_workspace (mgd, TRUE);
 	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
 
-	/* Get Arthur person */
+	/* Get Arthur person from /Stable/Testing/Private */
 	GValue gval = {0, };
 	g_value_init (&gval, G_TYPE_STRING);
 	g_value_set_string (&gval, arthur_guid);
@@ -133,6 +134,7 @@ midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, g
 	
 	MidgardWorkspace *object_workspace = midgard_object_get_workspace (person);
 	g_assert (object_workspace != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE (workspace));
 
 	gchar *ws_name;
 	gchar *object_ws_name;
@@ -153,12 +155,13 @@ midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, g
 	error = NULL;
 	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_PATH, &error);
 	g_assert (get_by_path == TRUE);
+	g_assert (MIDGARD_IS_WORKSPACE (workspace));
 
 	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
 	midgard_connection_enable_workspace (mgd, TRUE);
 	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
 
-	/* Get Lancelot person */
+	/* Get Lancelot person from /Stable/Testing/Private/Lancelot */
 	g_value_init (&gval, G_TYPE_STRING);
 	g_value_set_string (&gval, lancelot_guid);
 	person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
@@ -169,6 +172,7 @@ midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, g
 
 	object_workspace = midgard_object_get_workspace (person);
 	g_assert (object_workspace != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE (object_workspace));
 
 	g_object_get (workspace, "name", &ws_name, NULL);
 	g_object_get (object_workspace, "name", &object_ws_name, NULL);
@@ -176,6 +180,116 @@ midgard_test_object_workspace_select_created (MidgardObjectWorkspaceTest *mwt, g
 	g_assert_cmpstr (ws_name, ==, object_ws_name);
 
 	g_free (ws_name);
+	g_free (object_ws_name);
+
+	g_object_unref (workspace);
+	g_object_unref (object_workspace);
+	g_object_unref (person);
+
+	/* FAIL */
+
+	/* Get Arthur person from /Stable/Testing/Private/Lancelot */
+	g_value_init (&gval, G_TYPE_STRING);
+	g_value_set_string (&gval, arthur_guid);
+	person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
+	g_value_unset (&gval);
+
+	g_assert (person == NULL);
+	MIDGARD_TEST_ERROR_ASSERT (mgd, MGD_ERR_NOT_EXISTS);
+}
+
+void 
+midgard_test_object_workspace_context_select_created (MidgardObjectWorkspaceTest *mwt, gconstpointer data)
+{
+	MidgardConnection *mgd = mwt->mgd;
+        const MidgardWorkspaceManager *manager = midgard_connection_get_workspace_manager (mgd);
+        g_assert (manager != NULL);
+
+	MidgardWorkspaceContext *workspace = midgard_workspace_context_new ();
+	GError *error = NULL;
+	gboolean get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_CONTEXT_PATH, &error);
+	g_assert (get_by_path == TRUE);
+	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace));
+
+	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
+	midgard_connection_enable_workspace (mgd, TRUE);
+	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
+
+	/* Get Arthur person from /Stable/Testing/Private context */
+	GValue gval = {0, };
+	g_value_init (&gval, G_TYPE_STRING);
+	g_value_set_string (&gval, arthur_guid);
+	MidgardObject *person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
+	g_value_unset (&gval);
+
+	g_assert (person != NULL);
+	MIDGARD_TEST_ERROR_OK(mgd);
+	
+	MidgardWorkspace *object_workspace = midgard_object_get_workspace (person);
+	g_assert (object_workspace != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE (object_workspace));
+
+	gchar *object_ws_name;
+	g_object_get (object_workspace, "name", &object_ws_name, NULL);
+
+	g_assert_cmpstr (MGD_TEST_WORKSPACE_NAME_PRIVATE, ==, object_ws_name);
+
+	g_free (object_ws_name);
+
+	g_object_unref (workspace);
+	g_object_unref (object_workspace);
+	g_object_unref (person);
+
+	workspace = midgard_workspace_context_new ();
+	error = NULL;
+	get_by_path = midgard_workspace_manager_get_workspace_by_path (manager, MIDGARD_WORKSPACE_STORAGE (workspace), MGD_TEST_WORKSPACE_PATH, &error);
+	g_assert (get_by_path == TRUE);
+	g_assert (MIDGARD_IS_WORKSPACE_CONTEXT (workspace));
+
+	midgard_connection_set_workspace (mgd, MIDGARD_WORKSPACE_STORAGE (workspace));
+	midgard_connection_enable_workspace (mgd, TRUE);
+	g_assert (midgard_connection_is_enabled_workspace (mgd) == TRUE);
+
+	/* Get Lancelot person from /Stable/Testing/Private/Lancelot context */
+	g_value_init (&gval, G_TYPE_STRING);
+	g_value_set_string (&gval, lancelot_guid);
+	person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
+	g_value_unset (&gval);
+
+	g_assert (person != NULL);
+	MIDGARD_TEST_ERROR_OK(mgd);
+
+	object_workspace = midgard_object_get_workspace (person);
+	g_assert (object_workspace != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE (object_workspace));
+
+	g_object_get (object_workspace, "name", &object_ws_name, NULL);
+
+	g_assert_cmpstr (MGD_TEST_WORKSPACE_NAME_LANCELOT, ==, object_ws_name);
+
+	g_free (object_ws_name);
+
+	g_object_unref (workspace);
+	g_object_unref (object_workspace);
+	g_object_unref (person);
+
+	/* Get Arthur person from /Stable/Testing/Private/Lancelot context */
+	g_value_init (&gval, G_TYPE_STRING);
+	g_value_set_string (&gval, arthur_guid);
+	person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
+	g_value_unset (&gval);
+
+	g_assert (person != NULL);
+	MIDGARD_TEST_ERROR_OK(mgd);
+
+	object_workspace = midgard_object_get_workspace (person);
+	g_assert (object_workspace != NULL);
+	g_assert (MIDGARD_IS_WORKSPACE (object_workspace));
+
+	g_object_get (object_workspace, "name", &object_ws_name, NULL);
+
+	g_assert_cmpstr (MGD_TEST_WORKSPACE_NAME_PRIVATE, ==, object_ws_name);
+
 	g_free (object_ws_name);
 
 	g_object_unref (workspace);
