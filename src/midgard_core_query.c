@@ -641,9 +641,9 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object)
 		return FALSE;
 	}
 
-	GdaStatement *update = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_update;
+	GdaStatement *update = klass->dbpriv->get_statement_update (klass, mgd);
 	g_return_val_if_fail (update != NULL, FALSE);
-	GdaSet *params = MIDGARD_DBOBJECT_GET_CLASS (object)->dbpriv->statement_update_params;
+	GdaSet *params = klass->dbpriv->get_statement_update_params (klass, mgd);
 
 	guint n_props;
 	guint i;	
