@@ -291,8 +291,7 @@ midgard_test_object_workspace_context_select_created (MidgardObjectWorkspaceTest
 	g_assert_cmpstr (MGD_TEST_WORKSPACE_NAME_PRIVATE, ==, object_ws_name);
 
 	g_free (object_ws_name);
-
-	g_object_unref (workspace);
+	
 	g_object_unref (object_workspace);
 	g_object_unref (person);
 }
