@@ -521,7 +521,7 @@ __initialize_statement_update_query_string (MidgardDBObjectClass *klass, gboolea
 	GdaSqlParser *parser = gda_sql_parser_new ();
 	GdaStatement *stmt;
 	GError *error = NULL;
-	stmt = gda_sql_parser_parse_string (parser, sql->str, NULL, &error);
+	stmt = gda_sql_parser_parse_string (parser, sql->str, NULL, &error);	
 
 	return g_string_free (sql, FALSE);
 }
@@ -554,7 +554,7 @@ __get_statement_update (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 
 static GdaSet *
 __get_statement_update_params (MidgardDBObjectClass *klass, MidgardConnection *mgd)
-{
+{	
 	GdaStatement *stmt = klass->dbpriv->get_statement_update (klass, mgd);
 	if (!stmt) {
 		g_error ("Failed to get GdaStatement and GdaSet (%s)", G_OBJECT_CLASS_NAME (klass));
@@ -752,6 +752,10 @@ midgard_core_dbobject_private_new ()
 	dbpriv->_workspace_statement_insert_params = NULL;
 	dbpriv->get_statement_insert = NULL;
 	dbpriv->get_statement_insert_params = NULL;	
+	dbpriv->_statement_update = NULL;
+	dbpriv->_statement_update_params = NULL;
+	dbpriv->_workspace_statement_update = NULL;
+	dbpriv->_workspace_statement_update_params = NULL;
 	dbpriv->get_statement_update = NULL;
 	dbpriv->get_statement_update_params = NULL;	
 	dbpriv->set_static_sql_select = NULL;
