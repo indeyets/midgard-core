@@ -526,8 +526,8 @@ _midgard_query_select_executable_iface_execute (MidgardExecutable *iface, GError
 	texpr->value = tval;
 	s_target->expr = texpr;
 
-	/* Add fields for all properties registered per class (SELECT a,b,c...) */
-	klass->dbpriv->add_fields_to_select_statement (klass, cnc, sss, s_target->as);
+	/* Add fields for all properties registered per class (SELECT a,b,c...) */	
+	klass->dbpriv->add_fields_to_select_statement (klass, mgd, sss, s_target->as);
 
 	/* Add joins, LEFT JOIN tbl2 ON... */
 	__query_select_add_joins (MIDGARD_QUERY_SELECT (self), &err);
