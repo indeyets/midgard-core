@@ -619,7 +619,7 @@ __midgard_user_update (MidgardUser *self)
 		}
 	}
 
-	if (midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self)))
+	if (midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self), NULL) )
 		return TRUE;
 
 	MIDGARD_ERRNO_SET (mgd, MGD_ERR_INTERNAL);

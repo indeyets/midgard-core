@@ -217,7 +217,7 @@ _midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorksp
 			g_object_unref (ws_dup);
 	}
 
-	if (midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self))) {
+	if (midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self), NULL)) {
 		midgard_core_workspace_list_all (mgd);
 		return TRUE;
 	}

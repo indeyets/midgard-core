@@ -628,8 +628,12 @@ midgard_core_query_create_dbobject_record (MidgardDBObject *object)
 	return inserted;
 }
 
-gboolean 
-midgard_core_query_update_dbobject_record (MidgardDBObject *object)
+/* Return:
+ * positive or 0 - number of affected rows
+ * negative - error
+ */ 
+gint 
+midgard_core_query_update_dbobject_record (MidgardDBObject *object, GError **error)
 {
 	g_return_val_if_fail (object != NULL, FALSE);
 	
@@ -637,8 +641,9 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object)
 	GdaConnection *cnc = mgd->priv->connection;
 	MidgardDBObjectClass *klass = MIDGARD_DBOBJECT_GET_CLASS (object);
 	if (!klass) {
-		g_warning ("Can not find class pointer for %s instance", G_OBJECT_TYPE_NAME (object));
-		return FALSE;
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, 
+				"Can not find class pointer for %s instance", G_OBJECT_TYPE_NAME (object));
+		return -1;
 	}
 
 	GdaStatement *update = klass->dbpriv->get_statement_update (klass, mgd);
@@ -651,7 +656,7 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object)
 	g_return_val_if_fail (pspecs != NULL, FALSE);
 
 	const gchar *pk = midgard_reflector_object_get_property_primary (G_OBJECT_CLASS_NAME (klass));
-	GError *error = NULL;
+	GError *err = NULL;
 
 	for (i = 0; i < n_props; i++) {
 		/* Ignore primary key and property of GObject type*/
@@ -671,11 +676,20 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object)
 		g_free (debug_sql);
 	}
 
-	gboolean updated = (gda_connection_statement_execute_non_select (cnc, update, params, NULL, &error) == -1) ? FALSE : TRUE;
+	gint updated = gda_connection_statement_execute_non_select (cnc, update, params, NULL, &err);
+	
+	if (updated == 0) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_NOT_EXISTS,
+				"Nothing to update.");
+		if (err)
+			g_clear_error (&err);
+	}
 
-	if (!updated) {
-		g_warning ("Query failed. %s", error && error->message ? error->message : "Unknown reason");
-		return FALSE;
+	if (updated < 0) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL,
+				"UPDATE query failed. %s", err && err->message ? err->message : "Unknown reason");
+		if (err)
+			g_clear_error (&err);
 	}
 
 	return updated;

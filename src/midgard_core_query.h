@@ -285,7 +285,7 @@ gboolean midgard_core_table_exists(
 
 GdaDataModel 		*midgard_core_query_get_dbobject_model 		(MidgardConnection *mgd, MidgardDBObjectClass *klass, guint n_params, const GParameter *parameters);
 gboolean		midgard_core_query_create_dbobject_record 	(MidgardDBObject *object);
-gboolean		midgard_core_query_update_dbobject_record 	(MidgardDBObject *object);
+gint			midgard_core_query_update_dbobject_record 	(MidgardDBObject *object, GError **error);
 gchar                   *midgard_core_query_binary_stringify            (GValue *src_value); 
 gchar 			*midgard_core_query_compute_constraint_property	(MidgardQueryExecutor *executor, MidgardQueryStorage *storage, const gchar *name, GError **error);
 gchar 			*midgard_core_query_unescape_string (MidgardConnection *mgd, const gchar *str);

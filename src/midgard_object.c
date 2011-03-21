@@ -558,7 +558,7 @@ gboolean midgard_object_set_guid(MidgardObject *self, const gchar *guid)
 }
 
 gboolean 
-_midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
+_midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GError **error)
 {
 	g_return_val_if_fail (self != NULL, FALSE);
 	
@@ -573,9 +573,11 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 
 	MIDGARD_ERRNO_SET(mgd, MGD_ERR_OK);	
 
-	/* FIXME, set invalid property */
-	if (MGD_OBJECT_GUID (self) == NULL)
-		g_critical("Object's guid is NULL. Can not update");
+	if (MGD_OBJECT_GUID (self) == NULL) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INVALID_PROPERTY_VALUE, 
+				"Can not update '%s'. Object's guid is NULL.", G_OBJECT_TYPE_NAME (G_OBJECT (self)));
+		return FALSE;
+	}
 
 	/* Get object's size as it's needed for size' diff.
 	 * midgard_core_object_is_valid computes new size */
@@ -587,14 +589,17 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 		return FALSE;
 
 	if (MIDGARD_DBOBJECT (self)->dbpriv->storage_data == NULL) {
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL);
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, 
+				"This is absolutely critical and internal error. No type metadata attributes for '%s' class.",
+				G_OBJECT_TYPE_NAME (G_OBJECT (self)));
 		return FALSE;
 	}
+
 	table = midgard_core_class_get_table(dbklass);
 	if (table  == NULL) {
-		/* Object has no storage defined. Return FALSE as there is nothing to update */
-		g_warning("Object '%s' has no table defined!", G_OBJECT_TYPE_NAME(self));
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL);
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, 
+				"Can not update. No table configured for '%s' class.",
+				G_OBJECT_TYPE_NAME (G_OBJECT (self)));
 		return FALSE;
 	}
 
@@ -603,11 +608,8 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 		return FALSE;
 
 	if (metadata) {
-	
-		guint object_size = metadata->priv->size;
-	
+		guint object_size = metadata->priv->size;	
 		if (midgard_quota_size_is_reached(self, object_size)){
-	
 			MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (self), MGD_ERR_QUOTA);
 			return FALSE;
 		}
@@ -642,9 +644,12 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 		}
 	}
 
-	gboolean updated = midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self));	
-	if (!updated) {
-		MIDGARD_ERRNO_SET(MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL);
+	gint updated = midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self), &err);	
+	if (updated < 0) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL,
+				"SQL query UPDATE failed: %s", err && err->message ? err->message : "Unknown reason");
+		if (err)
+			g_clear_error (&err);
 		return FALSE;
 	}
 
@@ -722,7 +727,14 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 gboolean midgard_object_update(MidgardObject *self)
 {
 	g_signal_emit(self, MIDGARD_OBJECT_GET_CLASS(self)->signal_action_update, 0);
-	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE);
+
+	GError *error;
+	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE, &error);
+
+	if (!rv && error) {
+		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL, "%s", error->message);
+		g_clear_error (&error);
+	}	
 
 	if (rv) {
 		__dbus_send(self, "update");
