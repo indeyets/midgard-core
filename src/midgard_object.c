@@ -724,12 +724,21 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GErr
  * 
  * Returns: %TRUE if object's record(s) is successfully updated, %FALSE otherwise.
  */ 
-gboolean midgard_object_update(MidgardObject *self)
+gboolean 
+midgard_object_update (MidgardObject *self)
 {
 	g_signal_emit(self, MIDGARD_OBJECT_GET_CLASS(self)->signal_action_update, 0);
 
 	GError *error;
 	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE, &error);
+
+	/* If there's workspace enabled, try to create object's record,
+	 * if particular 'NOT_EXISTS' error is set. */
+	if (error 
+			&& error->domain == MIDGARD_GENERIC_ERROR
+			&& error->code == MGD_ERR_NOT_EXISTS) {
+		return midgard_object_create (self);
+	}
 
 	if (!rv && error) {
 		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL, "%s", error->message);
