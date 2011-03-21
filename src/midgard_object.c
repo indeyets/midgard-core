@@ -566,6 +566,7 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 	const gchar *table;
 	GString *sql = NULL;
 	guint object_init_size = 0;
+	GError *err = NULL;
 	
 	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
 	MidgardDBObjectClass *dbklass = MIDGARD_DBOBJECT_GET_CLASS (self);
@@ -612,12 +613,34 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate)
 		}
 	}
 
-      	/* Set workspace context */
-	GdaSet *params = dbklass->dbpriv->get_statement_update_params (dbklass, mgd);
-	/* Workspace id */
-	gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
-	/* Workspace object id */
-	gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_OID_FIELD, MGD_OBJECT_WS_OID (self));
+	if (MGD_CNC_USES_WORKSPACE (mgd)) {
+      		/* Set workspace context */
+		GdaSet *params = dbklass->dbpriv->get_statement_update_params (dbklass, mgd);
+		if (!params) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL,
+					"Failed to get parameters for prepared UPDATE statement (%s).",
+					G_OBJECT_CLASS_NAME (dbklass));
+			return FALSE;
+		}
+		/* Workspace id */
+		gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_ID_FIELD, MGD_CNC_WORKSPACE_ID(mgd));
+		if (err) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL,
+					"Failed to set workspace id UPDATE parameter: %s.",
+					err && err->message ? err->message : "Unknown reason");
+			g_clear_error (&err);
+			return FALSE;
+		}
+		/* Workspace object id */
+		gda_set_set_holder_value (params, NULL, MGD_WORKSPACE_OID_FIELD, MGD_OBJECT_WS_OID (self));
+		if (err) {
+			MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL,
+					"Failed to set object's workspace id UPDATE parameter: %s.",
+					err && err->message ? err->message : "Unknown reason");
+			g_clear_error (&err);
+			return FALSE;
+		}
+	}
 
 	gboolean updated = midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self));	
 	if (!updated) {
