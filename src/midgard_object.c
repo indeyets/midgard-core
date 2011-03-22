@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "midgard_core_workspace.h"
 #include "midgard_workspace.h"
 #include "midgard_workspace_storage.h"
+#include "midgard_core_config.h"
 
 GType _midgard_attachment_type = 0;
 static gboolean signals_registered = FALSE;
@@ -737,26 +738,42 @@ midgard_object_update (MidgardObject *self)
 
 	GError *error = NULL;
 	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE, &error);
+	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
+	MidgardConfig *config = mgd->priv->config;
 
 	/* If there's workspace enabled, try to create object's record,
 	 * if particular 'NOT_EXISTS' error is set. */
-	if (MGD_CNC_USES_WORKSPACE (MGD_OBJECT_CNC (self))
-			&& error 
-			&& error->domain == MIDGARD_GENERIC_ERROR
-			&& error->code == MGD_ERR_NOT_EXISTS) {
-		gboolean created = midgard_object_create (self);
+	if (MGD_CNC_USES_WORKSPACE (MGD_OBJECT_CNC (self))) {
+
+		/* FIXME, libgda's mysql provider returns 0 for update query, which affected row(s).
+		 * Check object's record directly. */
+		if (config->priv->dbtype == MIDGARD_DB_TYPE_MYSQL) {
+			GValue idv = {0, };
+			g_value_init (&idv, G_TYPE_UINT);
+			gboolean id_get = midgard_core_query_get_object_value (MIDGARD_DBOBJECT (self), "id", &idv);
+			g_value_unset (&idv);
+			if (!id_get)
+				return _midgard_object_create (self, MGD_OBJECT_GUID (self), OBJECT_UPDATE_CREATE);
+			else 
+				goto return_with_success;
+		} else if (error 
+				&& error->domain == MIDGARD_GENERIC_ERROR
+				&& error->code == MGD_ERR_NOT_EXISTS) {
+			return _midgard_object_create (self, MGD_OBJECT_GUID (self), OBJECT_UPDATE_CREATE);
+		}
 	}
 
 	if (!rv && error) {
 		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL, "%s", error->message);
 		g_clear_error (&error);
+		return FALSE;
 	}	
 
-	if (rv) {
-		__dbus_send(self, "update");
-	}
+return_with_success:
+	MIDGARD_ERRNO_SET (mgd, MGD_ERR_OK);
+	__dbus_send(self, "update");
 
-	return rv;
+	return TRUE;
 }
 
 static GPtrArray *__get_glists(MidgardObject *object) 
@@ -1019,43 +1036,23 @@ gboolean _midgard_object_create (	MidgardObject *object,
 
 	/* Always! get ID of newly created object */
 	/* See: http://mail.gnome.org/archives/gnome-db-list/2007-April/msg00020.html */
-	query = g_string_new("");
-	g_string_append_printf(query, "guid = '%s' ", MGD_OBJECT_GUID (object));
-
-#warning "Use workspace id constraint when getting object's id"	
-	GValue *idval =
-		midgard_core_query_get_field_value(
-				mgd, "id", tablename,
-				(const gchar*) query->str);
-	g_string_free(query, TRUE);
-	
 	guint new_id = 0;
-	if (G_IS_VALUE(idval)) {
-
-		if (G_VALUE_TYPE(idval) == G_TYPE_UINT)
-			new_id = g_value_get_uint(idval);
-		else if (G_VALUE_TYPE(idval) == G_TYPE_INT)
-			new_id = g_value_get_int(idval);
-		else 
-			g_warning("Unexpected type for primary key (%s)", G_VALUE_TYPE_NAME(idval));
-		
-		g_value_unset(idval);
-		g_free(idval);
+	GValue ov = {0, };
+	g_value_init (&ov, G_TYPE_UINT);
+	gboolean id_get = midgard_core_query_get_object_value (MIDGARD_DBOBJECT (object), "id", &ov);
+	if (id_get) {
+		new_id = g_value_get_uint (&ov);
 	}
+	g_value_unset (&ov);
 
-	GParamSpec *pspec = 
-		g_object_class_find_property(G_OBJECT_GET_CLASS(object), "id");
-	
+	GParamSpec *pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(object), "id");
 	if (pspec) {		
-
 		if (new_id == 0) {
-
 			g_critical("Newly created %s object's id is 0! ( object's guid - %s )",
 					G_OBJECT_TYPE_NAME(G_OBJECT(object)),
 					MGD_OBJECT_GUID (object));
 			MIDGARD_ERRNO_SET (MGD_OBJECT_CNC (object), MGD_ERR_INTERNAL);    
 			return FALSE;
-
 		} else {
 
 			g_object_set(G_OBJECT(object), "id", new_id, NULL);
@@ -1093,6 +1090,7 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	switch(replicate){
 		
 		case OBJECT_UPDATE_NONE:
+		case OBJECT_UPDATE_CREATE:
 			g_signal_emit(object, MIDGARD_OBJECT_GET_CLASS(object)->signal_action_created, 0);
 			break;
 		

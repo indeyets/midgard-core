@@ -255,7 +255,8 @@ struct _MidgardBlobPrivate {
 typedef enum {
 	OBJECT_UPDATE_NONE = 0,
 	OBJECT_UPDATE_EXPORTED,
-	OBJECT_UPDATE_IMPORTED
+	OBJECT_UPDATE_IMPORTED,
+	OBJECT_UPDATE_CREATE
 } _ObjectActionUpdate;
 
 
