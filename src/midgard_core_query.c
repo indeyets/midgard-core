@@ -2273,14 +2273,14 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 		return;
 	}
 
-	if (classname == NULL) {
-		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Expected class name. Can not get object.");
-		return;
-	}
-
 	const gchar *cname = classname;
 	if (*object) 
 		cname = G_OBJECT_TYPE_NAME (*object);
+
+	if (cname == NULL) {
+		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, "Expected class name. Can not get object.");
+		return;
+	}
 
 	GSList *arg_list = NULL;
 	GSList *objects_list = NULL;
