@@ -1062,16 +1062,18 @@ gboolean _midgard_object_create (	MidgardObject *object,
 	/* UPDATE object's workspace data */
 	/* If workspace object id is 0 we do fallback to self id, to keep unique
 	 * oid reference. This is typical create without workspace context */
-	MGD_OBJECT_WS_ID (object) = MGD_CNC_WORKSPACE_ID (mgd);
-	guint oid = MGD_OBJECT_WS_OID (object);
-	if (oid == 0) {
-		MGD_OBJECT_WS_OID (object) = new_id;
-		/* UPDATE WS object id field using newly created id value */
-		query = g_string_new ("UPDATE ");
-		g_string_append_printf (query, " %s SET %s=%d WHERE id=%d",
-				tablename, MGD_WORKSPACE_OID_FIELD, new_id, new_id);
-		midgard_core_query_execute(MGD_OBJECT_CNC (object), query->str, FALSE);
-		g_string_free(query, TRUE);
+	if (MGD_CNC_USES_WORKSPACE (mgd)) {
+		MGD_OBJECT_WS_ID (object) = MGD_CNC_WORKSPACE_ID (mgd);
+		guint oid = MGD_OBJECT_WS_OID (object);
+		if (oid == 0) {
+			MGD_OBJECT_WS_OID (object) = new_id;
+			/* UPDATE WS object id field using newly created id value */
+			query = g_string_new ("UPDATE ");
+			g_string_append_printf (query, " %s SET %s=%d WHERE id=%d",
+					tablename, MGD_WORKSPACE_OID_FIELD, new_id, new_id);
+			midgard_core_query_execute(MGD_OBJECT_CNC (object), query->str, FALSE);
+			g_string_free(query, TRUE);
+		}
 	}
 
 	/* INSERT repligard's record */
