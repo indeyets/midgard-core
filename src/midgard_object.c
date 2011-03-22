@@ -644,7 +644,13 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GErr
 		}
 	}
 
-	gint updated = midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self), &err);	
+	gint updated = midgard_core_query_update_dbobject_record (MIDGARD_DBOBJECT (self), &err);
+
+	if (updated == 0) {
+		g_propagate_error (error, err);
+		return FALSE;
+	}
+
 	if (updated < 0) {
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL,
 				"SQL query UPDATE failed: %s", err && err->message ? err->message : "Unknown reason");
@@ -729,15 +735,16 @@ midgard_object_update (MidgardObject *self)
 {
 	g_signal_emit(self, MIDGARD_OBJECT_GET_CLASS(self)->signal_action_update, 0);
 
-	GError *error;
+	GError *error = NULL;
 	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE, &error);
 
 	/* If there's workspace enabled, try to create object's record,
 	 * if particular 'NOT_EXISTS' error is set. */
-	if (error 
+	if (MGD_CNC_USES_WORKSPACE (MGD_OBJECT_CNC (self))
+			&& error 
 			&& error->domain == MIDGARD_GENERIC_ERROR
 			&& error->code == MGD_ERR_NOT_EXISTS) {
-		return midgard_object_create (self);
+		gboolean created = midgard_object_create (self);
 	}
 
 	if (!rv && error) {
