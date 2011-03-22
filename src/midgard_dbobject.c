@@ -148,7 +148,9 @@ _midgard_dbobject_get_property (MidgardDBObject *self, const gchar *name, GValue
 	if (!src_val)
 		return FALSE;
 
-	if (!G_IS_VALUE (src_val)) {
+	if (!G_IS_VALUE (src_val) 
+			|| (G_IS_VALUE (src_val) 
+				&& G_VALUE_TYPE (src_val) == GDA_TYPE_NULL)) {
 		/* NULL fetched from underlying field */
 		if (G_VALUE_HOLDS_STRING (value)) {
 			g_value_set_string (value, "");
@@ -162,6 +164,9 @@ _midgard_dbobject_get_property (MidgardDBObject *self, const gchar *name, GValue
 		g_value_transform (src_val, value);
 	else 
 		g_value_copy (src_val, value);
+
+	if (G_VALUE_HOLDS_STRING (value) && g_value_get_string (value) == NULL)
+		g_value_set_string (value, "");
 
 	return TRUE;
 }
