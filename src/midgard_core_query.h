@@ -230,6 +230,11 @@ GValue *midgard_core_query_get_field_value(
 			const gchar *table, 
 			const gchar *where);
 
+gboolean midgard_core_query_get_object_value(
+			MidgardDBObject *dbobject,
+			const gchar *column,
+			GValue *value);
+
 guint midgard_core_query_get_id(
 			MidgardConnection *mgd, 
 			const gchar *table,

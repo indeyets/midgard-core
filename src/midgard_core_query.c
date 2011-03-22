@@ -29,12 +29,13 @@
 #include <sql-parser/gda-sql-parser.h>
 #include "midgard_metadata.h"
 #include "midgard_reflector_object.h"
-#include "midgard_validable.h"
 #include "midgard_query_value.h"
 #include "midgard_query_constraint.h"
 #include "midgard_query_select.h"
 #include "midgard_query_constraint_group.h"
 #include "midgard_executable.h"
+#include "midgard_validable.h"
+#include "midgard_core_workspace.h"
 
 /* Do not use _DB_DEFAULT_DATETIME.
  * Some databases (like MySQL) fails to create datetime column with datetime which included timezone. 
@@ -257,6 +258,60 @@ GValue *midgard_core_query_get_field_value(
 	g_object_unref(model);
 
 	return new_value;
+}
+
+gboolean
+midgard_core_query_get_object_value (MidgardDBObject *dbobject, const gchar *column, GValue *value)
+{
+	g_return_val_if_fail (dbobject != NULL, FALSE);
+	MidgardConnection *mgd = MGD_OBJECT_CNC (dbobject);
+	g_return_val_if_fail (mgd != NULL, FALSE);
+	const gchar *table = midgard_core_class_get_table (MIDGARD_DBOBJECT_GET_CLASS (dbobject));
+	g_return_val_if_fail (table != NULL, FALSE);
+	g_return_val_if_fail (column != NULL, FALSE);
+
+	GString *sql = g_string_new ("SELECT ");
+	g_string_append_printf (sql, " %s FROM %s WHERE guid='%s'",
+			column, table, MGD_OBJECT_GUID (dbobject));
+
+	if (MGD_CNC_USES_WORKSPACE (mgd)) {
+		g_string_append_printf (sql, " AND %s=%d", 
+				MGD_WORKSPACE_ID_FIELD,
+				MGD_CNC_WORKSPACE_ID(mgd));
+	}
+
+	GdaDataModel *model = midgard_core_query_get_model (mgd, sql->str);
+
+	if(!model)
+	       return FALSE;
+	
+	if (!GDA_IS_DATA_MODEL (model)) {
+		g_warning ("Returned model is not GDA_DATA_MODEL");
+		MIDGARD_ERRNO_SET (mgd, MGD_ERR_INTERNAL);
+		return FALSE;
+	}
+
+	const GValue *v = midgard_data_model_get_value_at(model, 0, 0);
+
+	if (!v) {
+		g_object_unref (model);
+		return FALSE;
+	}
+
+	if (G_VALUE_TYPE (v) == GDA_TYPE_NULL) {
+		g_object_unref (model);
+		g_warning ("Unexpected NULL type for returned value");
+		return FALSE;
+	}
+
+	if (G_VALUE_TYPE (v) != G_VALUE_TYPE (value))
+		g_value_transform (v, value);
+	else
+		g_value_copy (v, value);
+
+	g_object_unref (model);
+
+	return TRUE;
 }
 
 guint 
@@ -677,7 +732,7 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object, GError **err
 	}
 
 	gint updated = gda_connection_statement_execute_non_select (cnc, update, params, NULL, &err);
-	
+
 	if (updated == 0) {
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_NOT_EXISTS,
 				"Nothing to update.");
