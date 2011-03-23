@@ -577,6 +577,7 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GErr
 	if (MGD_OBJECT_GUID (self) == NULL) {
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INVALID_PROPERTY_VALUE, 
 				"Can not update '%s'. Object's guid is NULL.", G_OBJECT_TYPE_NAME (G_OBJECT (self)));
+		MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INVALID_PROPERTY_VALUE, "%s", error->message);
 		return FALSE;
 	}
 
@@ -593,6 +594,7 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GErr
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, 
 				"This is absolutely critical and internal error. No type metadata attributes for '%s' class.",
 				G_OBJECT_TYPE_NAME (G_OBJECT (self)));
+		MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, "%s", error->message);
 		return FALSE;
 	}
 
@@ -601,6 +603,7 @@ _midgard_object_update (MidgardObject *self, _ObjectActionUpdate replicate, GErr
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_INTERNAL, 
 				"Can not update. No table configured for '%s' class.",
 				G_OBJECT_TYPE_NAME (G_OBJECT (self)));
+		MIDGARD_ERRNO_SET_STRING (mgd, MGD_ERR_INTERNAL, "%s", error->message);
 		return FALSE;
 	}
 
