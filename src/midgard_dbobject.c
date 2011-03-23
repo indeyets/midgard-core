@@ -543,7 +543,7 @@ __get_statement_update (MidgardDBObjectClass *klass, MidgardConnection *mgd)
 		return klass->dbpriv->_workspace_statement_update;
 	}
 
-	if (!klass->dbpriv->_statement_insert) {
+	if (!klass->dbpriv->_statement_update) {
 		query = __initialize_statement_update_query_string (klass, FALSE);
 		__initialize_statement_update_query_parameters (klass, query, FALSE);
 		g_free (query);
