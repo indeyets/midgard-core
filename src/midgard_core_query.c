@@ -33,6 +33,7 @@
 #include "midgard_query_value.h"
 #include "midgard_query_constraint.h"
 #include "midgard_query_select.h"
+#include "midgard_query_constraint_group.h"
 #include "midgard_executable.h"
 
 /* Do not use _DB_DEFAULT_DATETIME.

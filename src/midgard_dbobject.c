@@ -317,12 +317,12 @@ __initialize_statement_insert_query_string (MidgardDBObjectClass *klass)
 	guint n_props;
 	guint i;
 	const gchar *table = MGD_DBCLASS_TABLENAME (klass);
-	g_return_if_fail (table != NULL);
+	g_return_val_if_fail (table != NULL, NULL);
 
 	g_string_append (sql, table); 
 
 	GParamSpec **pspecs = midgard_core_dbobject_class_list_properties (klass, &n_props);
-	g_return_if_fail (pspecs != NULL);
+	g_return_val_if_fail (pspecs != NULL, NULL);
 
 	GString *colnames = g_string_new ("");
 	GString *values = g_string_new ("");
