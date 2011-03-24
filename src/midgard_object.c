@@ -157,6 +157,11 @@ __midgard_object_set_property (GObject *object, guint prop_id,
 	if (midgard_core_object_property_refuse_private (mgd, priv, MIDGARD_DBOBJECT (object), pspec->name))
 		return;
 
+	if (MIDGARD_DBOBJECT (self)->dbpriv->datamodel) {
+		g_object_unref (MIDGARD_DBOBJECT (self)->dbpriv->datamodel);
+		MIDGARD_DBOBJECT (self)->dbpriv->datamodel = NULL;
+	}
+
 	switch (prop_id) {
 			
 		case MIDGARD_PROPERTY_GUID:
@@ -742,37 +747,23 @@ midgard_object_update (MidgardObject *self)
 	GError *error = NULL;
 	gboolean rv =  _midgard_object_update(self, OBJECT_UPDATE_NONE, &error);
 	MidgardConnection *mgd = MGD_OBJECT_CNC (self);
-	MidgardConfig *config = mgd->priv->config;
 
 	/* If there's workspace enabled, try to create object's record,
 	 * if particular 'NOT_EXISTS' error is set. */
-	if (MGD_CNC_USES_WORKSPACE (MGD_OBJECT_CNC (self))) {
-
-		/* FIXME, libgda's mysql provider returns 0 for update query, which affected row(s).
-		 * Check object's record directly. */
-		if (config->priv->dbtype == MIDGARD_DB_TYPE_MYSQL) {
-			GValue idv = {0, };
-			g_value_init (&idv, G_TYPE_UINT);
-			gboolean id_get = midgard_core_query_get_object_value (MIDGARD_DBOBJECT (self), "id", &idv);
-			g_value_unset (&idv);
-			if (!id_get)
-				return _midgard_object_create (self, MGD_OBJECT_GUID (self), OBJECT_UPDATE_CREATE);
-			else 
-				goto return_with_success;
-		} else if (error 
-				&& error->domain == MIDGARD_GENERIC_ERROR
-				&& error->code == MGD_ERR_NOT_EXISTS) {
-			return _midgard_object_create (self, MGD_OBJECT_GUID (self), OBJECT_UPDATE_CREATE);
-		}
+	if (MGD_CNC_USES_WORKSPACE (MGD_OBJECT_CNC (self))
+			 && error 
+			 && error->domain == MIDGARD_GENERIC_ERROR
+			 && error->code == MGD_ERR_NOT_EXISTS) {
+		return _midgard_object_create (self, MGD_OBJECT_GUID (self), OBJECT_UPDATE_CREATE);
 	}
 
-	if (!rv && error) {
-		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL, "%s", error->message);
+	if (!rv) {
+		MIDGARD_ERRNO_SET_STRING (MGD_OBJECT_CNC (self), MGD_ERR_INTERNAL, "%s", 
+				error && error->message ? error->message : "Unknown error");
 		g_clear_error (&error);
 		return FALSE;
 	}	
 
-return_with_success:
 	MIDGARD_ERRNO_SET (mgd, MGD_ERR_OK);
 	__dbus_send(self, "update");
 
