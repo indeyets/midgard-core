@@ -752,7 +752,7 @@ midgard_replicator_import_from_xml (MidgardConnection *mgd,  const gchar *xml, g
 		attr = xmlGetProp(child, BAD_CAST "purge");
 		guid_attr = xmlGetProp(child, BAD_CAST "guid");
 
-		if(g_str_equal(attr, "yes")) {
+		if(attr && g_str_equal(attr, "yes")) {
 			
 			dbobject = midgard_schema_object_factory_get_object_by_guid (mgd, (const gchar *)guid_attr);
 
