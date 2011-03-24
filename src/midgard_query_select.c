@@ -620,7 +620,7 @@ _midgard_query_select_executable_iface_execute (MidgardExecutable *iface, GError
 	GdaSqlExpr *where = sss->where_cond;
 	GdaSqlOperation *operation = where->cond;
 	/* Add joins, LEFT JOIN tbl2 ON... */
-	__query_select_add_joins (MIDGARD_QUERY_SELECT (self), operation, &err));
+	__query_select_add_joins (MIDGARD_QUERY_SELECT (self), operation, &err);
 	if (err) {
 	 	g_propagate_error (error, err);
 		goto return_false;
