@@ -325,6 +325,16 @@ midgard_test_object_workspace_update (MidgardObjectWorkspaceTest *mwt, gconstpoi
 
 	gboolean object_updated = midgard_object_update (person);
 	MIDGARD_TEST_ERROR_OK(mgd);
+
+	/* Check revision, it should be at least 1 */
+	MidgardMetadata *metadata;
+	g_object_get (G_OBJECT (person), "metadata", &metadata, NULL);
+	guint revision;
+	g_object_get (G_OBJECT (metadata), "revision", &revision, NULL);
+	g_object_unref (metadata);
+
+	g_assert_cmpuint (revision, >, 0);
+
 	g_assert (object_updated == TRUE);
 	
 	MidgardWorkspace *object_workspace = midgard_object_get_workspace (person);
@@ -364,6 +374,18 @@ midgard_test_object_workspace_update (MidgardObjectWorkspaceTest *mwt, gconstpoi
 
 	g_assert (person != NULL);
 	MIDGARD_TEST_ERROR_OK(mgd);
+
+	object_updated = midgard_object_update (person);
+	MIDGARD_TEST_ERROR_OK(mgd);
+
+	/* Check revision, it should be at least 1 */
+	g_object_get (G_OBJECT (person), "metadata", &metadata, NULL);
+	g_object_get (G_OBJECT (metadata), "revision", &revision, NULL);
+	g_object_unref (metadata);
+
+	g_assert_cmpuint (revision, >, 0);
+
+	g_assert (object_updated == TRUE);
 
 	object_workspace = midgard_object_get_workspace (person);
 	g_assert (object_workspace != NULL);
@@ -407,8 +429,8 @@ midgard_test_object_workspace_context_update (MidgardObjectWorkspaceTest *mwt, g
 	MidgardObject *person = midgard_object_new (mgd, _OBJECT_CLASS, &gval);
 	g_value_unset (&gval);
 
-	g_assert (person != NULL);
 	MIDGARD_TEST_ERROR_OK(mgd);
+	g_assert (person != NULL);
 
 	/* Implicitly create new Arthur object in /Stable/Private/Lancelot */
 	gboolean object_updated = midgard_object_update (person);
