@@ -734,6 +734,20 @@ midgard_core_query_update_dbobject_record (MidgardDBObject *object, GError **err
 	gint updated = gda_connection_statement_execute_non_select (cnc, update, params, NULL, &err);
 
 	if (updated == 0) {
+		/* If there's MySQL in use and object doesn't have metadata, we need to run
+		 * extra query to check if object's record exists and hasn't been updated or 
+		 * doesn't exist at all */
+		MidgardConfig *config = mgd->priv->config;
+		if (config->priv->dbtype == MIDGARD_DB_TYPE_MYSQL
+				&& (MGD_DBOBJECT_METADATA (object) == NULL)) {
+			GValue idv = {0, };
+			g_value_init (&idv, G_TYPE_UINT);
+			gboolean id_get = midgard_core_query_get_object_value (MIDGARD_DBOBJECT (object), "id", &idv);
+			g_value_unset (&idv);
+			if (id_get) 
+				return TRUE;
+		}	
+
 		g_set_error (error, MIDGARD_GENERIC_ERROR, MGD_ERR_NOT_EXISTS,
 				"Nothing to update.");
 		if (err)
@@ -2430,8 +2444,9 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	}
 
 	MGD_OBJECT_IN_STORAGE (*object) = TRUE;
-	MIDGARD_DBOBJECT(*object)->dbpriv->datamodel = g_object_ref (model);
-	MIDGARD_DBOBJECT(*object)->dbpriv->row = 0;
+	/* Do not set datamodel, unless read only mode is fully tested and implemented */
+	/* MIDGARD_DBOBJECT(*object)->dbpriv->datamodel = g_object_ref (model);
+	MIDGARD_DBOBJECT(*object)->dbpriv->row = 0; */
 	MIDGARD_DBOBJECT_GET_CLASS (*object)->dbpriv->set_from_data_model (MIDGARD_DBOBJECT (*object), model, 0, 0);
 
 free_objects_and_return:
