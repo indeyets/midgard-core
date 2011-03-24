@@ -2396,10 +2396,11 @@ midgard_core_query_get_object (MidgardConnection *mgd, const gchar *classname, M
 	/* We need either group or one constraint */
 	MidgardQueryConstraintSimple *constraint = NULL;
 	if (g_slist_length (arg_list) > 1) {
-		constraint = (MidgardQueryConstraintSimple*) midgard_query_constraint_group_new ();
+		MidgardQueryConstraintGroup *cgroup = midgard_query_constraint_group_new ();
 		for (l = arg_list; l != NULL; l = l->next) {
-			midgard_query_constraint_group_add_constraint (constraint, (MidgardQueryConstraintSimple *) l->data);
+			midgard_query_constraint_group_add_constraint (cgroup, (MidgardQueryConstraintSimple *) l->data);
 		}
+		constraint = (MidgardQueryConstraintSimple*) cgroup;
 	} else {
 		constraint = (MidgardQueryConstraintSimple *) arg_list->data;
 	}

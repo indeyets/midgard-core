@@ -26,6 +26,7 @@
 #include "midgard_core_query.h"
 #include "midgard_core_config.h"
 #include "midgard_core_query_builder.h"
+#include "midgard_core_workspace.h"
 #include "midgard_user.h"
 
 /**

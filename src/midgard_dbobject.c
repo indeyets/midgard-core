@@ -479,12 +479,12 @@ __initialize_statement_update_query_string (MidgardDBObjectClass *klass, gboolea
 	guint n_props;
 	guint i;
 	const gchar *table = MGD_DBCLASS_TABLENAME (klass);
-	g_return_if_fail (table != NULL);
+	g_return_val_if_fail (table != NULL, NULL);
 
 	g_string_append_printf (sql, "UPDATE %s SET ", table); 
 
 	GParamSpec **pspecs = midgard_core_dbobject_class_list_properties (klass, &n_props);
-	g_return_if_fail (pspecs != NULL);
+	g_return_val_if_fail (pspecs != NULL, NULL);
 
 	const gchar *pk = MGD_DBCLASS_PRIMARY (klass);
 	gboolean add_coma = FALSE;

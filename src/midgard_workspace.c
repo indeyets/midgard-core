@@ -95,7 +95,7 @@ _midgard_workspace_create (const MidgardWorkspaceManager *manager, MidgardWorksp
 	if (workspace_name == NULL 
 			|| (workspace_name != NULL && *workspace_name == '\0')) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
-					"Invalid (empty or null) workspace's name", NULL); 
+					"Invalid (empty or null) workspace's name"); 
 		return FALSE;
 	}
 
@@ -183,7 +183,7 @@ _midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorksp
 
 	if (self->priv->id == 0) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
-					"Invalid value ID for workspace", NULL); 
+					"Invalid value ID for workspace"); 
 		return FALSE;
 	}
 
@@ -191,7 +191,7 @@ _midgard_workspace_update (const MidgardWorkspaceManager *manager, MidgardWorksp
 	if (workspace_name == NULL 
 			|| (workspace_name != NULL && *workspace_name == '\0')) {
 		g_set_error (error, MIDGARD_WORKSPACE_STORAGE_ERROR, MIDGARD_WORKSPACE_STORAGE_ERROR_INVALID_VALUE,
-					"Invalid (empty or null) workspace's name", NULL); 
+					"Invalid (empty or null) workspace's name"); 
 		return FALSE;
 	}
 

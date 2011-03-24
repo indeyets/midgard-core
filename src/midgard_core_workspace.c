@@ -22,6 +22,7 @@
 #include "midgard_workspace.h"
 #include "midgard_core_object.h"
 #include "midgard_core_workspace.h"
+#include "midgard_storage.h"
 
 MidgardWorkspacePrivate *
 midgard_core_workspace_private_new () 
@@ -34,6 +35,8 @@ midgard_core_workspace_private_new ()
 	priv->up_id = 0;
 	priv->manager = NULL;
 	priv->context = NULL;
+
+	return priv;
 }
 
 void 
