@@ -279,7 +279,34 @@ __statement_insert_add_metadata_fields (MidgardDBObjectClass *klass, GString *co
 }
 
 static void
-__initialize_statement_insert (MidgardDBObjectClass *klass)
+__initialize_statement_insert_query_parameters (MidgardDBObjectClass *klass, const gchar *query_string)
+{
+	GdaSqlParser *parser = gda_sql_parser_new ();
+	GdaStatement *stmt;
+	GError *error = NULL;
+	stmt = gda_sql_parser_parse_string (parser, query_string, NULL, &error);
+
+	if (!stmt) {
+
+		g_error ("Couldn't create %s class prepared statement. %s", 
+				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
+		return;
+	}
+
+	GdaSet *params; 
+	if (!gda_statement_get_parameters (stmt, &params, &error)) {
+		g_error ("Failed to create GdaSet for %s class. %s", 
+				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
+	}
+	
+	klass->dbpriv->statement_insert = stmt;
+	klass->dbpriv->statement_insert_params = params;
+	
+	return;
+}
+
+static gchar *
+__initialize_statement_insert_query_string (MidgardDBObjectClass *klass)
 {
 	GString *sql = g_string_new ("INSERT INTO ");
 	guint n_props;
@@ -321,33 +348,19 @@ __initialize_statement_insert (MidgardDBObjectClass *klass)
 	__statement_insert_add_metadata_fields (klass, colnames, values);
 
 	g_string_append_printf (sql, " (%s) VALUES (%s)", colnames->str, values->str);		
-
-	GdaSqlParser *parser = gda_sql_parser_new ();
-	GdaStatement *stmt;
-	GError *error = NULL;
-	stmt = gda_sql_parser_parse_string (parser, sql->str, NULL, &error);
-
-	g_string_free (sql, TRUE);
+	
 	g_string_free (colnames, TRUE);
 	g_string_free (values, TRUE);
 
-	if (!stmt) {
+	return g_string_free (sql, FALSE);
+}
 
-		g_error ("Couldn't create %s class prepared statement. %s", 
-				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
-		return;
-	}
-
-	GdaSet *params; 
-	if (!gda_statement_get_parameters (stmt, &params, &error)) {
-		g_error ("Failed to create GdaSet for %s class. %s", 
-				G_OBJECT_CLASS_NAME (klass), error && error->message ? error->message : "Unknown reason");
-	}
-	
-	klass->dbpriv->statement_insert = stmt;
-	klass->dbpriv->statement_insert_params = params;
-	
-	return;
+static void
+__initialize_statement_insert (MidgardDBObjectClass *klass)
+{
+	gchar *query = __initialize_statement_insert_query_string (klass);
+	__initialize_statement_insert_query_parameters (klass, query);
+	g_free (query);
 }
 
 static void
