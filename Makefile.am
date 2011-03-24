@@ -80,7 +80,6 @@ midgard_public_h = \
 	src/midgard_user.h \
 	src/midgard_utils.h \
 	src/midgard_validable.h \
-	src/midgard_view.h
 	src/midgard_view.h \
 	src/midgard_workspace.h \
 	src/midgard_workspace_context.h \
@@ -95,7 +94,7 @@ EXTRA_DIST =  \
 	$(man_MANS) \
 	midgard2.pc.in \
 	$(schema_DATA) \
-	$(views_DATA) 
+	$(views_DATA) \
 	m4/introspection.m4
 
 LDADD = src/libmidgard2.la
@@ -149,7 +148,7 @@ src_libmidgard2_la_core_SOURCES = \
 	src/midgard_core_views.h \
 	src/midgard_core_xml.h \
 	src/midgard_core_xml.c \
-    	src/midgard_core_workspace.h \
+	src/midgard_core_workspace.h \
 	src/midgard_core_workspace.c \
 	$(NULL)
 
@@ -203,7 +202,6 @@ src_libmidgard2_la_public_SOURCES = \
 	src/midgard_md5.c \
 	src/midgard_md5.h \
 	src/midgard_validable.c \
-	src/midgard_view.c
 	src/midgard_view.c \
 	src/midgard_workspace.c \
 	src/midgard_workspace_context.c \
